@@ -18,27 +18,12 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     _startAutoRefresh();
   }
   void _startAutoRefresh() {
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      add(RefreshCryptoList());
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      add(LoadCryptoList());
     });
   }
   Future<void> _load(
       LoadCryptoList event,
-      Emitter<CryptoListState> emit,
-      ) async {
-    try {
-      emit(CryptoListLoading());
-      _allCoins = await coinsRepository.getCoinsList();
-      emit(CryptoListLoaded(
-        coinsList: _allCoins,
-        filteredCoins: _allCoins,
-      ));
-    } catch (e) {
-      emit(CryptoListLoadingFailure(e));
-    }
-  }
-  Future<void> _load1(
-      RefreshCryptoList event,
       Emitter<CryptoListState> emit,
       ) async {
     try {
