@@ -7,7 +7,7 @@ abstract class CryptoListEvent extends Equatable {
 }
 
 class LoadCryptoList extends CryptoListEvent {}
-
+class RefreshCryptoList extends CryptoListEvent {}
 class SearchCryptoList extends CryptoListEvent {
   final String query;
   const SearchCryptoList(this.query);

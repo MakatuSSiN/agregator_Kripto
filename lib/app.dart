@@ -16,8 +16,9 @@ class CryptoApp extends StatelessWidget {
     return MultiBlocProvider(
         providers: [
         BlocProvider(
-        create: (context) => CryptoListBloc(getIt<AbstractCoinsRepository>()),
-    ),
+        create: (context) => CryptoListBloc(getIt<AbstractCoinsRepository>())
+        ..add(LoadCryptoList()),
+        ),
     ],
     child: MaterialApp(
     title: 'CRYPTO APP',

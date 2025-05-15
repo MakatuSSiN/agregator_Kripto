@@ -13,6 +13,7 @@ class CryptoListScreen extends StatefulWidget {
 }
 
 class _CryptoListScreenState extends State<CryptoListScreen> {
+  int _currentPageIndex = 0;
   final _searchController = TextEditingController();
   late final CryptoListBloc _cryptoListBloc;
   @override
@@ -54,27 +55,60 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
           ),
         ),
       ),
-      body: BlocBuilder<CryptoListBloc, CryptoListState>(
-        bloc: _cryptoListBloc,
-        builder: (context, state) {
-          if (state is CryptoListLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is CryptoListLoadingFailure) {
-            return Center(child: Text('Error: ${state.exception}'));
-          }
-          if (state is CryptoListLoaded) {
-            return ListView.builder(
-              itemCount: state.filteredCoins.length,
-              itemBuilder: (context, index) {
-                final coin = state.filteredCoins[index];
-                return CryptoCoinTile(coin: coin);
-              },
-            );
-          }
-          return const SizedBox();
-        },
-      ),
+      body: _buildCurrentPage(),
+        bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+      setState(() {
+        _currentPageIndex = index;
+      });
+    },
+    selectedIndex: _currentPageIndex,
+    destinations: const [
+    NavigationDestination(
+    icon: Icon(Icons.home),
+    label: 'Home',
+    ),
+    NavigationDestination(
+    icon: Icon(Icons.person),
+    label: 'Profile',
+    ),
+    ],
+    ),
     );
   }
+    Widget _buildCurrentPage() {
+      switch (_currentPageIndex) {
+        case 0:
+
+    return BlocBuilder<CryptoListBloc, CryptoListState>(
+      bloc: _cryptoListBloc,
+      builder: (context, state) {
+        if (state is CryptoListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is CryptoListLoadingFailure) {
+          return Center(child: Text('Error: ${state.exception}'));
+        }
+        if (state is CryptoListLoaded) {
+          return RefreshIndicator(
+              onRefresh: () async {
+                context.read<CryptoListBloc>().add(LoadCryptoList());
+              },
+              child: ListView.builder(
+            itemCount: state.filteredCoins.length,
+            itemBuilder: (context, index) {
+              final coin = state.filteredCoins[index];
+              return CryptoCoinTile(coin: coin);
+            },
+          )
+          );
+        }
+        return const SizedBox();
+      },
+    );
+        case 1: // Profile
+          return const Center(child: Text('Profile Page'));
+        default:
+          return const SizedBox();
 }
+}}
