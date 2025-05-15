@@ -1,10 +1,16 @@
 part of 'crypto_list_bloc.dart';
 
-abstract class CryptoListEvent extends Equatable {}
-
-class LoadCryptoList extends CryptoListEvent {
+abstract class CryptoListEvent extends Equatable {
+  const CryptoListEvent();
   @override
-  // TODO: implement props
   List<Object?> get props => [];
+}
 
+class LoadCryptoList extends CryptoListEvent {}
+
+class SearchCryptoList extends CryptoListEvent {
+  final String query;
+  const SearchCryptoList(this.query);
+  @override
+  List<Object?> get props => [query];
 }

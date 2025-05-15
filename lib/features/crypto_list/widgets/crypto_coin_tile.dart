@@ -13,17 +13,25 @@ class CryptoCoinTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ListTile(
-      leading: Image.network(coin.imageUrl),
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: Image.network(coin.imageUrl),
+      ),
       title: Text(
-          coin.name,
-          style: theme.textTheme.bodyMedium),
+        coin.name,
+        style: theme.textTheme.bodyMedium,
+      ),
       subtitle: Text(
-        "${coin.priceInUSD} \$",
+        "${coin.priceInUSD.toStringAsFixed(2)} \$ (${coin.symbol})",
         style: theme.textTheme.labelSmall,
       ),
-      trailing: Icon(Icons.arrow_forward),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
-        Navigator.of(context).pushNamed("/coin", arguments: coin);
+        Navigator.of(context).pushNamed(
+          '/coin',
+          arguments: coin,
+        );
       },
     );
   }

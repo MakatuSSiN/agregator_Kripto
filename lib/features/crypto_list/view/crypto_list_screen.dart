@@ -1,10 +1,8 @@
+import 'package:agregator_kripto/features/crypto_list/widgets/crypto_coin_tile.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import "package:agregator_kripto/features/crypto_list/bloc/crypto_list_bloc.dart";
-import "package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart";
-import "package:flutter/material.dart";
-import "package:flutter_bloc/flutter_bloc.dart";
-import "package:get_it/get_it.dart";
-import "../widgets/widgets.dart";
+import '../bloc/crypto_list_bloc.dart';
 
 class CryptoListScreen extends StatefulWidget {
   const CryptoListScreen({super.key, required this.title});
@@ -15,13 +13,20 @@ class CryptoListScreen extends StatefulWidget {
 }
 
 class _CryptoListScreenState extends State<CryptoListScreen> {
-  final _cryptoListBloc = CryptoListBloc(GetIt.I<AbstractCoinsRepository>());
-  int currentPageIndex = 0;
-
+  final _searchController = TextEditingController();
+  late final CryptoListBloc _cryptoListBloc;
   @override
   void initState() {
-    _cryptoListBloc.add(LoadCryptoList());
     super.initState();
+    _cryptoListBloc = context.read<CryptoListBloc>();
+    //_cryptoListBloc.add(LoadCryptoList());
+    context.read<CryptoListBloc>().add(LoadCryptoList());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -29,86 +34,47 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search cryptocurrencies...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (query) {
+                context.read<CryptoListBloc>().add(SearchCryptoList(query));
+              },
+            ),
+          ),
+        ),
       ),
-      body: _buildCurrentScreen(), // Переключаем экраны здесь
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
+      body: BlocBuilder<CryptoListBloc, CryptoListState>(
+        bloc: _cryptoListBloc,
+        builder: (context, state) {
+          if (state is CryptoListLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is CryptoListLoadingFailure) {
+            return Center(child: Text('Error: ${state.exception}'));
+          }
+          if (state is CryptoListLoaded) {
+            return ListView.builder(
+              itemCount: state.filteredCoins.length,
+              itemBuilder: (context, index) {
+                final coin = state.filteredCoins[index];
+                return CryptoCoinTile(coin: coin);
+              },
+            );
+          }
+          return const SizedBox();
         },
-        backgroundColor: Colors.white12,
-        indicatorColor: Colors.amber,
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_sharp),
-            label: 'Notifications',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.messenger_sharp),
-            label: 'Messages',
-          ),
-        ],
       ),
     );
-  }
-
-  // Метод для выбора текущего экрана
-  Widget _buildCurrentScreen() {
-    switch (currentPageIndex) {
-      case 0: // Home (экран с криптовалютами)
-        return RefreshIndicator(
-          onRefresh: () async {
-            _cryptoListBloc.add(LoadCryptoList());
-          },
-          child: BlocBuilder<CryptoListBloc, CryptoListState>(
-            bloc: _cryptoListBloc,
-            builder: (context, state) {
-              if (state is CryptoListLoaded) {
-                return ListView.separated(
-                  padding: const EdgeInsets.only(top: 2, left: 10, bottom: 50),
-                  itemCount: state.coinsList.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, i) {
-                    final coin = state.coinsList[i];
-                    return CryptoCoinTile(coin: coin);
-                  },
-                );
-              }
-              if (state is CryptoListLoadingFailure) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text("ОШИБКА ЗАГРУЗКИ"),
-                      const SizedBox(height: 35),
-                      TextButton(
-                        onPressed: () {
-                          _cryptoListBloc.add(LoadCryptoList());
-                        },
-                        child: const Text("Попробовать снова"),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            },
-          ),
-        );
-      case 1: // Notifications
-        return const Center(child: Text("Уведомления"));
-      case 2: // Messages
-        return const Center(child: Text("Сообщения"));
-      default:
-        return const Center(child: Text("Неизвестный экран"));
-    }
   }
 }

@@ -7,15 +7,21 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 
 import 'firebase_options.dart';
-
+final getIt = GetIt.instance;
 void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  GetIt.I.registerLazySingleton<AbstractCoinsRepository> (() => CryptoCoinsRepository(dio: Dio()));
+  _setupDependencies();
   runApp(const CryptoApp());
+}
+void _setupDependencies() {
+  getIt.registerLazySingleton<Dio>(() => Dio());
+  getIt.registerLazySingleton<AbstractCoinsRepository>(
+        () => CryptoCoinsRepository(dio: getIt<Dio>()),
+  );
 }
 
 

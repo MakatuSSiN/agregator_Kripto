@@ -1,34 +1,34 @@
+import 'package:equatable/equatable.dart';
+
 import 'models.dart';
 
-class CryptoCoinDetail extends CryptoCoin {
-   CryptoCoinDetail({
-    required super.name,
-    required super.priceInUSD,
-    required super.imageUrl,
+class CryptoCoinDetail extends Equatable {
+  const CryptoCoinDetail({
+    required this.name,
+    required this.priceInUSD,
+    required this.imageUrl,
     required this.toSymbol,
     required this.lastUpdate,
-    required this.hight24Hour,
-    required this.low24Hours,
+    required this.high24Hour,
+    required this.low24Hour,
   });
 
-  // TOSYMBOL
+  final String name;
+  final double priceInUSD;
+  final String imageUrl;
   final String toSymbol;
-
-  // LASTUPDATE
   final DateTime lastUpdate;
-
-  // HIGH24HOUR
-  final double hight24Hour;
-
-  // LOW24HOUR
-  final double low24Hours;
+  final double high24Hour;
+  final double low24Hour;
 
   @override
-  List<Object> get props => super.props
-    ..addAll([
-      toSymbol,
-      lastUpdate,
-      hight24Hour,
-      low24Hours,
-    ]);
+  List<Object> get props => [
+    name,
+    priceInUSD,
+    imageUrl,
+    toSymbol,
+    lastUpdate,
+    high24Hour,
+    low24Hour,
+  ];
 }

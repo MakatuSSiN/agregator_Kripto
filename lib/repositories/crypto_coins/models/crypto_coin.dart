@@ -1,17 +1,18 @@
 import 'package:equatable/equatable.dart';
 
-class CryptoCoin extends Equatable{
-  final String name;      // Название валюты (USD, JPY, EUR)
-  final double priceInUSD; // Курс
-  final String imageUrl;
-
-  CryptoCoin({
+class CryptoCoin extends Equatable {
+  const CryptoCoin({
     required this.name,
     required this.priceInUSD,
-    required this.imageUrl
+    required this.imageUrl,
+    required this.symbol,
   });
 
+  final String name;
+  final double priceInUSD;
+  final String imageUrl;
+  final String symbol;
+
   @override
-  // TODO: implement props
   List<Object> get props => [name, priceInUSD, imageUrl];
 }
