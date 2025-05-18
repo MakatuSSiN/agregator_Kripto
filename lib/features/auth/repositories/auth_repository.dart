@@ -25,6 +25,7 @@ class AuthRepository {
         email: email,
         password: password,
       );
+      await credential.user?.sendEmailVerification();
       return credential.user;
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.message ?? 'Sign up failed');
@@ -33,6 +34,15 @@ class AuthRepository {
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
+  }
+
+  Future<void> resendVerificationEmail() async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      await user.sendEmailVerification();
+    } else {
+      throw AuthException('No authenticated user');
+    }
   }
 }
 

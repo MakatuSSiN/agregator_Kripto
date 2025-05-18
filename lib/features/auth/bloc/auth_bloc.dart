@@ -13,6 +13,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInRequested>(_signIn);
     on<SignUpRequested>(_signUp);
     on<SignOutRequested>(_signOut);
+    on<ResendVerificationRequested>(_resendVerification);
   }
 
   Future<void> _signIn(SignInRequested event, Emitter<AuthState> emit) async {
@@ -20,7 +21,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.signIn(event.email, event.password);
       if (user != null) {
-        emit(Authenticated(user));
+        if (user.emailVerified) {
+          emit(Authenticated(user));
+        } else {
+          await authRepository.resendVerificationEmail();
+          emit(EmailNotVerified(user.email ?? event.email));
+        }
       } else {
         emit(Unauthenticated());
       }
@@ -34,9 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.signUp(event.email, event.password);
       if (user != null) {
-        emit(Authenticated(user));
-      } else {
-        emit(Unauthenticated());
+        emit(EmailVerificationSent(event.email));
       }
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -47,5 +51,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     await authRepository.signOut();
     emit(Unauthenticated());
+  }
+
+  Future<void> _resendVerification(
+      ResendVerificationRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(AuthLoading());
+    try {
+      await authRepository.resendVerificationEmail();
+      emit(EmailVerificationSent(event.email));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 }

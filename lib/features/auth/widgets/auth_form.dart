@@ -33,64 +33,117 @@ class _AuthFormState extends State<AuthForm> {
         }
       },
       builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                if (state is AuthError)
-                  Text(
-                    (state as AuthError).message,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _submit,
-                  child: Text(_isLogin ? 'Sign In' : 'Sign Up'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isLogin = !_isLogin;
-                    });
-                  },
-                  child: Text(_isLogin
-                      ? 'Create new account'
-                      : 'I already have an account'),
-                ),
-              ],
-            ),
-          ),
-        );
+        if (state is EmailVerificationSent) {
+          return _buildVerificationSent(state.email);
+        }
+        return _buildAuthForm(state);
       },
+    );
+  }
+
+  Widget _buildAuthForm(AuthState state) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter email';
+                }
+                if (!value.contains('@')) {
+                  return 'Please enter valid email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            if (state is AuthError)
+              Text(
+                (state as AuthError).message,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: state is AuthLoading ? null : _submit,
+              child: state is AuthLoading
+                  ? const CircularProgressIndicator()
+                  : Text(_isLogin ? 'Sign In' : 'Sign Up'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isLogin = !_isLogin;
+                });
+              },
+              child: Text(_isLogin
+                  ? 'Create new account'
+                  : 'I already have an account'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerificationSent(String email) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.mark_email_read, size: 64),
+            const SizedBox(height: 24),
+            Text(
+              'Verification Email Sent',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Please check your email $email and click the verification link',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                  SignInRequested(_emailController.text, _passwordController.text),
+                );
+              },
+              child: const Text('I have verified my email'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                  ResendVerificationRequested(email),
+                );
+              },
+              child: const Text('Resend verification email'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
