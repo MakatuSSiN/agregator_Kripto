@@ -3,28 +3,34 @@ import 'package:agregator_kripto/router/router.dart';
 import 'package:agregator_kripto/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
+import 'features/auth/bloc/auth_bloc.dart';
+import 'features/auth/repositories/auth_repository.dart';
 import 'features/crypto_list/bloc/crypto_list_bloc.dart';
 import 'main.dart';
 
 class CryptoApp extends StatelessWidget {
   const CryptoApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-        providers: [
+      providers: [
         BlocProvider(
-        create: (context) => CryptoListBloc(getIt<AbstractCoinsRepository>())
-        ..add(LoadCryptoList()),
+          create: (context) => CryptoListBloc(GetIt.I<AbstractCoinsRepository>())
+            ..add(LoadCryptoList()),
         ),
-    ],
-    child: MaterialApp(
-    title: 'CRYPTO APP',
-    theme: darkTheme,
-    initialRoute: '/',
-    routes: routes
-    ));
+        BlocProvider(
+          create: (context) => AuthBloc(GetIt.I<AuthRepository>()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'CRYPTO APP',
+        theme: darkTheme,
+        initialRoute: '/',
+        routes: routes,
+      ),
+    );
   }
 }

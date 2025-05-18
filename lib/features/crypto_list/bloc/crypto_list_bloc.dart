@@ -18,7 +18,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     _startAutoRefresh();
   }
   void _startAutoRefresh() {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 100), (timer) {
       add(LoadCryptoList());
     });
   }

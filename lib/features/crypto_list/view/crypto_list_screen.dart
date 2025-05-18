@@ -57,23 +57,21 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
       ),
       body: _buildCurrentPage(),
         bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-      setState(() {
-        _currentPageIndex = index;
-      });
-    },
-    selectedIndex: _currentPageIndex,
-    destinations: const [
-    NavigationDestination(
-    icon: Icon(Icons.home),
-    label: 'Home',
-    ),
-    NavigationDestination(
-    icon: Icon(Icons.person),
-    label: 'Profile',
-    ),
-    ],
-    ),
+          onDestinationSelected: (int index) {
+            if (index == 1) {
+              Navigator.pushNamed(context, '/profile');
+            } else {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            }
+          },
+          selectedIndex: _currentPageIndex,
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+            NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
     );
   }
     Widget _buildCurrentPage() {

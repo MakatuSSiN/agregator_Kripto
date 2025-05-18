@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 
+import 'features/auth/bloc/auth_bloc.dart';
+import 'features/auth/repositories/auth_repository.dart';
 import 'firebase_options.dart';
 final getIt = GetIt.instance;
 void main() async{
@@ -22,6 +24,8 @@ void _setupDependencies() {
   getIt.registerLazySingleton<AbstractCoinsRepository>(
         () => CryptoCoinsRepository(dio: getIt<Dio>()),
   );
+  getIt.registerLazySingleton<AuthRepository>(() => AuthRepository());
+  getIt.registerFactory<AuthBloc>(() => AuthBloc(getIt<AuthRepository>()));
 }
 
 
