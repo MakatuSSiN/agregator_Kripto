@@ -51,7 +51,8 @@ class _AuthFormState extends State<AuthForm> {
           children: [
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: 'Email',),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter email';
@@ -65,6 +66,7 @@ class _AuthFormState extends State<AuthForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _passwordController,
+              style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
               validator: (value) {

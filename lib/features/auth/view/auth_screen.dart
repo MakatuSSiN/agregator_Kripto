@@ -49,7 +49,10 @@ class _UserProfile extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(user.email ?? 'No email',
-              style: Theme.of(context).textTheme.titleLarge),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white,
+                fontSize: 18,
+              ),),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {

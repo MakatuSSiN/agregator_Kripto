@@ -68,6 +68,7 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
             controller: _searchController,
+            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Search cryptocurrencies...',
               prefixIcon: const Icon(Icons.search),
