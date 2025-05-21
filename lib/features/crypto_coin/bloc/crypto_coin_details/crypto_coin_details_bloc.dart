@@ -7,12 +7,13 @@ part 'crypto_coin_details_state.dart';
 
 class CryptoCoinDetailsBloc
     extends Bloc<CryptoCoinDetailsEvent, CryptoCoinDetailsState> {
+  final AbstractCoinsRepository coinsRepository;
   CryptoCoinDetailsBloc(this.coinsRepository)
       : super(const CryptoCoinDetailsState()) {
     on<LoadCryptoCoinDetails>(_load);
   }
 
-  final AbstractCoinsRepository coinsRepository;
+  //final AbstractCoinsRepository coinsRepository;
 
   Future<void> _load(
       LoadCryptoCoinDetails event,
