@@ -48,4 +48,6 @@ class CryptoCoinsRepository implements AbstractCoinsRepository {
       low24Hour: usdData['LOW24HOUR'],
     );
   }
+
+
 }

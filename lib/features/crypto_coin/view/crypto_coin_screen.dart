@@ -40,7 +40,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _trackballBehavior = TrackballBehavior(
       enable: true,
       tooltipSettings: InteractiveTooltip(
-        format: 'point.x : point.open / point.close',
+        format: '',
         color: Colors.blueGrey,
       ),
     );
@@ -111,12 +111,22 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       }
 
                       return Container(
-                        height: 250,
+                        height: 300,
                         width: 400,
                         child: SfCartesianChart(
                           zoomPanBehavior: _zoomPanBehavior,
                           trackballBehavior: _trackballBehavior,
+                          crosshairBehavior: CrosshairBehavior(
+                            enable: true,
+                            //shouldShowLabel: false,
+                            //shouldAlwaysShow: false,
+                            //activationMode: ActivationMode.none,
+                            hideDelay: 1000,
+                            // activationMode: ActivationMode.doubleTap,
+                            lineType: CrosshairLineType.horizontal,
+                          ),
                           series: <CandleSeries>[
+
                             CandleSeries<ChartSampleData, DateTime>(
                               dataSource: snapshot.data!,
                               xValueMapper: (ChartSampleData data, _) => data.x,
@@ -127,6 +137,9 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                               //name: 'BTC/USD',
                               bullColor: Colors.green,
                               bearColor: Colors.red,
+                              enableSolidCandles: true,
+                              width: 1,
+                              spacing: 0.3,
                             )
                           ],
                           primaryXAxis: DateTimeAxis(
