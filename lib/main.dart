@@ -1,6 +1,6 @@
 import 'package:agregator_kripto/app.dart';
-import 'package:agregator_kripto/features/crypto_coin/view/crypto_coin_screen.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_coins_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +29,8 @@ void _setupDependencies() {
   );
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepository());
   getIt.registerFactory<AuthBloc>(() => AuthBloc(getIt<AuthRepository>()));
-  getIt.registerLazySingleton<CryptoCandleRepo>(
-        () => CryptoCandleRepo(getIt<Dio>()),
+  getIt.registerLazySingleton<CryptoCandleRepository>(
+        () => CryptoCandleRepository(getIt<Dio>()),
   );
 }
 
