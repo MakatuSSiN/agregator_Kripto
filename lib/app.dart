@@ -26,6 +26,7 @@ class CryptoApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'CRYPTO APP',
         theme: darkTheme,
         initialRoute: '/',

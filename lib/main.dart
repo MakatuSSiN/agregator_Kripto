@@ -1,4 +1,5 @@
 import 'package:agregator_kripto/app.dart';
+import 'package:agregator_kripto/features/crypto_coin/view/crypto_coin_screen.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_coins_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,12 +21,17 @@ void main() async{
   runApp(const CryptoApp());
 }
 void _setupDependencies() {
+
+  final dio = Dio();
   getIt.registerLazySingleton<Dio>(() => Dio());
   getIt.registerLazySingleton<AbstractCoinsRepository>(
         () => CryptoCoinsRepository(dio: getIt<Dio>()),
   );
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepository());
   getIt.registerFactory<AuthBloc>(() => AuthBloc(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<CryptoCandleRepo>(
+        () => CryptoCandleRepo(getIt<Dio>()),
+  );
 }
 
 

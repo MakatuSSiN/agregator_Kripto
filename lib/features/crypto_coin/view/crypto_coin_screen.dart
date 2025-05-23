@@ -17,19 +17,20 @@ class CryptoCoinScreen extends StatefulWidget {
 
 class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   CryptoCoin? coin;
-
-  final _coinDetailsBloc = CryptoCoinDetailsBloc(
-    GetIt.I<AbstractCoinsRepository>(),
-  );
-
   late Future<List<ChartSampleData>> _chartDataFuture;
+  late final CryptoCoinDetailsBloc _coinDetailsBloc;
+  late final CryptoCandleRepo _candleRepo;
   late ZoomPanBehavior _zoomPanBehavior;
   late TrackballBehavior _trackballBehavior;
 
   @override
   void initState() {
     super.initState();
-    _chartDataFuture = CryptoCandleRepo().getChartData();
+    _coinDetailsBloc = CryptoCoinDetailsBloc(
+      GetIt.I<AbstractCoinsRepository>(),
+    );
+    _candleRepo = GetIt.I<CryptoCandleRepo>();
+    //_chartDataFuture = CryptoCandleRepo().getChartData();
     _zoomPanBehavior = ZoomPanBehavior(
       enablePinching: true,     // Включить масштабирование щипком
       enableDoubleTapZooming: false, // Зум двойным тапом
@@ -53,6 +54,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     assert(args != null && args is CryptoCoin, 'You must provide String args');
     coin = args as CryptoCoin;
     _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+    _chartDataFuture = _candleRepo.getChartData(coin!.symbol);
     super.didChangeDependencies();
   }
 
@@ -145,9 +147,11 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                           primaryXAxis: DateTimeAxis(
                             dateFormat: DateFormat.Hm(),
                             majorGridLines: const MajorGridLines(width: 1),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
                           primaryYAxis: NumericAxis(
                             numberFormat: NumberFormat.simpleCurrency(decimalDigits: 2),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
                         ),
                       );
@@ -223,10 +227,12 @@ class ChartSampleData {
 }
 
 class CryptoCandleRepo {
-  Future<List<ChartSampleData>> getChartData() async {
+  final Dio dio;
+  CryptoCandleRepo(this.dio);
+  Future<List<ChartSampleData>> getChartData(String symbol) async {
     try {
       final response = await Dio().get(
-          "https://min-api.cryptocompare.com/data/v2/histohour?fsym=ETH&tsym=USD&limit=24"
+          "https://min-api.cryptocompare.com/data/v2/histohour?fsym=$symbol&tsym=USD&limit=24"
       );
 
       if (response.statusCode != 200) {
