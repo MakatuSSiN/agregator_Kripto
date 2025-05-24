@@ -9,7 +9,7 @@ class CryptoCandleRepository {
   Future<List<ChartSampleData>> getChartData(String symbol) async {
     try {
       final response = await dio.get(
-          "https://min-api.cryptocompare.com/data/v2/histohour?fsym=$symbol&tsym=USD&limit=24"
+          "https://min-api.cryptocompare.com/data/v2/histominute?fsym=$symbol&tsym=USD&limit=30"
       );
 
       final data = response.data as Map<String, dynamic>;

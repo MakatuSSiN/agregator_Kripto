@@ -1,4 +1,5 @@
 import 'package:agregator_kripto/features/crypto_coin/bloc/crypto_chart/crypto_chart_bloc.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin_details.dart';
@@ -22,11 +23,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   late final CryptoCoinDetailsBloc _coinDetailsBloc;
   late final ZoomPanBehavior _zoomPanBehavior;
   late final TrackballBehavior _trackballBehavior;
+  bool _isDataLoaded = false;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _coinDetailsBloc = context.read<CryptoCoinDetailsBloc>();
+    _coinDetailsBloc = CryptoCoinDetailsBloc(
+      GetIt.I<AbstractCoinsRepository>(),
+    );
 
     _zoomPanBehavior = ZoomPanBehavior(
         enablePinching: true,
@@ -51,27 +56,49 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     assert(args != null && args is CryptoCoin);
     coin = args as CryptoCoin;
     _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+    if (args != null && (coin == null || coin!.name != args.name)) {
+      coin = args;
+      _isDataLoaded = false;
+      _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+    }
     super.didChangeDependencies();
+  }
+
+
+  Future<void> _refreshData() async {
+    if (coin != null) {
+      _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+      context.read<CryptoChartBloc>().add(LoadCryptoChart(coin!.symbol));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(iconTheme: const IconThemeData(color: Colors.white)),
-      body: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
-        bloc: _coinDetailsBloc,
+    body: RefreshIndicator(
+    key: _refreshIndicatorKey,
+    onRefresh: _refreshData,
+    child: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
+    bloc: _coinDetailsBloc,
         builder: (context, state) {
           if (state is CryptoCoinDetailsLoaded) {
-            return BlocProvider(
+            return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+    child: Column(
+    children: [BlocProvider(
               create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
                 ..add(LoadCryptoChart(coin!.symbol)),
               child: _buildContent(state.coinDetails),
+            )]
+    )
             );
+
           }
           return const Center(child: CircularProgressIndicator());
         },
       ),
-    );
+    ));
   }
 
   Widget _buildContent(CryptoCoinDetail coinDetails) {
