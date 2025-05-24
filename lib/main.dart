@@ -22,7 +22,6 @@ void main() async{
 }
 void _setupDependencies() {
 
-  final dio = Dio();
   getIt.registerLazySingleton<Dio>(() => Dio());
   getIt.registerLazySingleton<AbstractCoinsRepository>(
         () => CryptoCoinsRepository(dio: getIt<Dio>()),

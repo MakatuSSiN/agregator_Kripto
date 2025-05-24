@@ -45,6 +45,7 @@ class CryptoChart extends StatelessWidget {
           enable: true,
           hideDelay: 1000,
           lineType: CrosshairLineType.horizontal,
+
         ),
         series: <CandleSeries<ChartSampleData, DateTime>>[
           CandleSeries<ChartSampleData, DateTime>(
@@ -58,18 +59,36 @@ class CryptoChart extends StatelessWidget {
             bearColor: Colors.red,
             enableSolidCandles: true,
             width: 1,
-            spacing: 0.3,
+            spacing: 0.1,
+            opacity: 1.5,
+            borderWidth: 0.9,
+            //name: 'val/usd',
           )
         ],
         primaryXAxis: DateTimeAxis(
           dateFormat: DateFormat.Hm(),
-          majorGridLines: const MajorGridLines(width: 1),
+          majorGridLines: const MajorGridLines(
+              width: 0.1,
+            color: Colors.grey
+          ),
           labelStyle: const TextStyle(color: Colors.white),
         ),
         primaryYAxis: NumericAxis(
           numberFormat: NumberFormat.simpleCurrency(decimalDigits: 2),
           labelStyle: const TextStyle(color: Colors.white),
+          majorGridLines: const MajorGridLines(
+              width: 0.1,
+              color: Colors.grey
+          ),
+            opposedPosition: true,
+            maximumLabels: 1
         ),
+        // indicators: [
+        //   RocIndicator<dynamic, dynamic>(
+        //     period: 1,
+        //     seriesName: 'val/usd',
+        //   ),
+        // ],
       ),
     );
   }

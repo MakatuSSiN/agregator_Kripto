@@ -29,7 +29,7 @@ class CryptoApp extends StatelessWidget {
         BlocProvider(
           create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>()),
         ),
-        BlocProvider(  // Добавьте этот провайдер
+        BlocProvider(
           create: (context) => CryptoCoinDetailsBloc(
             GetIt.I<AbstractCoinsRepository>(),
           ),

@@ -29,16 +29,17 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _coinDetailsBloc = context.read<CryptoCoinDetailsBloc>();
 
     _zoomPanBehavior = ZoomPanBehavior(
-      enablePinching: true,
-      enableDoubleTapZooming: false,
-      enablePanning: true,
-      zoomMode: ZoomMode.x,
+        enablePinching: true,
+        enableDoubleTapZooming: false,
+        enablePanning: true,
+        zoomMode: ZoomMode.x,
+        maximumZoomLevel: 0.2
     );
 
     _trackballBehavior = TrackballBehavior(
       enable: true,
       tooltipSettings: const InteractiveTooltip(
-        format: '',
+        //format: '',
         color: Colors.blueGrey,
       ),
     );
@@ -131,20 +132,4 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   }
 }
 
-class ChartSampleData {
-  ChartSampleData({
-    required this.x,
-    required this.open,
-    required this.close,
-    required this.low,
-    required this.high
-  });
-
-  final DateTime x;
-  final num open;
-  final num close;
-  final num low;
-  final num high;
-
-}
 
