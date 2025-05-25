@@ -21,6 +21,7 @@ class CryptoCoinScreen extends StatefulWidget {
 class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   CryptoCoin? coin;
   late final CryptoCoinDetailsBloc _coinDetailsBloc;
+  CryptoChartBloc? _chartBloc;
   late final ZoomPanBehavior _zoomPanBehavior;
   late final TrackballBehavior _trackballBehavior;
   bool _isDataLoaded = false;
@@ -33,6 +34,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       GetIt.I<AbstractCoinsRepository>(),
     );
 
+    _chartBloc = CryptoChartBloc(GetIt.I<CryptoCandleRepository>());
+
     _zoomPanBehavior = ZoomPanBehavior(
         enablePinching: true,
         enableDoubleTapZooming: false,
@@ -44,7 +47,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _trackballBehavior = TrackballBehavior(
       enable: true,
       tooltipSettings: const InteractiveTooltip(
-        //format: '',
         color: Colors.blueGrey,
       ),
     );
@@ -56,10 +58,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     assert(args != null && args is CryptoCoin);
     coin = args as CryptoCoin;
     _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+    _chartBloc?.add(LoadCryptoChart(coin!.symbol));
     if (args != null && (coin == null || coin!.name != args.name)) {
       coin = args;
       _isDataLoaded = false;
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
+      _chartBloc?.add(LoadCryptoChart(coin!.symbol));
     }
     super.didChangeDependencies();
   }
@@ -68,28 +72,39 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   Future<void> _refreshData() async {
     if (coin != null) {
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
-      context.read<CryptoChartBloc>().add(LoadCryptoChart(coin!.symbol));
+      _chartBloc?.add(LoadCryptoChart(coin!.symbol));
+      //context.read<CryptoChartBloc>().add(LoadCryptoChart(coin!.symbol));
     }
+  }
+
+  @override
+  void dispose() {
+    _chartBloc?.close();
+    _coinDetailsBloc.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(iconTheme: const IconThemeData(color: Colors.white)),
+        appBar: AppBar(iconTheme: const IconThemeData(color: Colors.white)),
     body: RefreshIndicator(
     key: _refreshIndicatorKey,
     onRefresh: _refreshData,
     child: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
-    bloc: _coinDetailsBloc,
-        builder: (context, state) {
+      bloc: _coinDetailsBloc,
+      builder: (context, state) {
           if (state is CryptoCoinDetailsLoaded) {
             return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-    child: Column(
-    children: [BlocProvider(
-              create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
-                ..add(LoadCryptoChart(coin!.symbol)),
-              child: _buildContent(state.coinDetails),
+            child: Column(
+                children: [
+                  if (_chartBloc != null)
+                  BlocProvider.value(
+                  value: _chartBloc!,
+                  // create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
+                  //   ..add(LoadCryptoChart(coin!.symbol)),
+                  child: _buildContent(state.coinDetails),
             )]
     )
             );
