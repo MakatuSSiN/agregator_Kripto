@@ -21,12 +21,13 @@ class ToggleFavorite extends FavoritesEvent {
 class FavoritesUpdated extends FavoritesEvent {
   final List<CryptoCoin> favorites;
   final String? error;
-
-  const FavoritesUpdated(this.favorites, {this.error});
+  final bool isAuthenticated;
+  const FavoritesUpdated(this.favorites, {this.error, this.isAuthenticated = true});
 
   @override
   List<Object> get props => [
     favorites,
     if (error != null) error!,
+    isAuthenticated,
   ];
 }

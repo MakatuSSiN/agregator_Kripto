@@ -27,8 +27,15 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   }
 
   void _subscribeToFavorites() {
+    _favoritesSubscription?.cancel();
     _favoritesSubscription = favoritesRepository.watchFavorites().listen(
-          (favorites) => add(FavoritesUpdated(favorites)),
+          (favorites) {
+        if (favorites.isEmpty && firebaseAuth.currentUser == null) {
+          add(FavoritesUpdated([], isAuthenticated: false));
+        } else {
+          add(FavoritesUpdated(favorites));
+        }
+      },
       onError: (error) => add(FavoritesUpdated([], error: error.toString())),
     );
   }

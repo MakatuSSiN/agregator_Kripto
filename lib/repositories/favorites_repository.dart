@@ -49,7 +49,9 @@ class FavoritesRepository {
   }
   Stream<List<CryptoCoin>> watchFavorites() {
     final user = firebaseAuth.currentUser;
-    if (user == null) throw Exception('User not authenticated');
+    if (user == null) {
+      return Stream.value([]);
+    }
 
     return firestore
         .collection('users')

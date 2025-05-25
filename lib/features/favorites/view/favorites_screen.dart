@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:agregator_kripto/features/auth/view/auth_screen.dart';
+import 'package:agregator_kripto/features/auth/bloc/auth_bloc.dart';
 import 'package:agregator_kripto/features/crypto_list/widgets/crypto_coin_tile.dart';
 import 'package:agregator_kripto/features/favorites/bloc/favorites_bloc.dart';
-
-import '../../../repositories/crypto_coins/models/crypto_coin.dart';
-import '../../auth/bloc/auth_bloc.dart';
-import '../../crypto_list/view/crypto_list_screen.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -30,29 +27,15 @@ class FavoritesScreen extends StatelessWidget {
             }
 
             if (state is FavoritesLoaded) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<FavoritesBloc>().add(LoadFavorites());
-                },
-                child: state.favorites.isEmpty
-                    ? const Center(child: Text('No favorites yet'))
-                    : ListView.builder(
-                  itemCount: state.favorites.length,
-                  itemBuilder: (context, index) {
-                    final coin = state.favorites[index];
-                    return CryptoCoinTile(coin: coin);
-                  },
-                ),
-              );
+              return _buildFavoritesList(context, state.favorites);
             }
 
-            return const Center(child: Text('Loading favorites...'));
+            return const Center(child: Text('Loading...'));
           },
         );
       },
     );
   }
-}
 
   Widget _buildUnauthenticatedView(BuildContext context) {
     return Center(
@@ -62,10 +45,9 @@ class FavoritesScreen extends StatelessWidget {
           const Text('Please sign in to view favorites'),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AuthScreen()),
-            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/profile');
+            },
             child: const Text('Sign In'),
           ),
         ],
@@ -73,6 +55,22 @@ class FavoritesScreen extends StatelessWidget {
     );
   }
 
-  void _toggleFavorite(BuildContext context, CryptoCoin coin) {
-    context.read<FavoritesBloc>().add(ToggleFavorite(coin));
+  Widget _buildFavoritesList(BuildContext context, List<CryptoCoin> favorites) {
+    if (favorites.isEmpty) {
+      return const Center(child: Text('No favorites yet'));
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<FavoritesBloc>().add(LoadFavorites());
+      },
+      child: ListView.builder(
+        itemCount: favorites.length,
+        itemBuilder: (context, index) {
+          final coin = favorites[index];
+          return CryptoCoinTile(coin: coin);
+        },
+      ),
+    );
   }
+}

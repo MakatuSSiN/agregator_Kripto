@@ -9,7 +9,9 @@ abstract class FavoritesState extends Equatable {
 
 class FavoritesInitial extends FavoritesState {}
 class FavoritesLoading extends FavoritesState {}
-class FavoritesUnauthenticated extends FavoritesState {}
+class FavoritesUnauthenticated extends FavoritesState {
+  const FavoritesUnauthenticated();
+}
 class FavoritesError extends FavoritesState {
   final String message;
   const FavoritesError(this.message);

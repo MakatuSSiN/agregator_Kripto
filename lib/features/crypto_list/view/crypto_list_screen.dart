@@ -56,20 +56,29 @@ class CryptoListScreenState extends State<CryptoListScreen> {
         index: _currentPageIndex,
         children: _pages,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentPageIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
+      bottomNavigationBar: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) { // Получаем authState здесь
+          return NavigationBar(
+            selectedIndex: _currentPageIndex,
+            onDestinationSelected: (index) {
+              if (index == 1 && authState is! Authenticated) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please sign in to view favorites')),
+                );
+                return;
+              }
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+              NavigationDestination(icon: Icon(Icons.star), label: 'Favorites'),
+              NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+            ],
+          );
         },
-        destinations: const [
-        NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-        NavigationDestination(icon: Icon(Icons.star), label: 'Favorites'),
-        NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-      ],
-    ),
-
+      ),
     );
   }
 
