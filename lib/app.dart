@@ -2,14 +2,17 @@ import 'package:agregator_kripto/features/crypto_coin/bloc/crypto_chart/crypto_c
 import 'package:agregator_kripto/features/crypto_coin/bloc/crypto_coin_details/crypto_coin_details_bloc.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
+import 'package:agregator_kripto/repositories/favorites_repository.dart';
 import 'package:agregator_kripto/router/router.dart';
 import 'package:agregator_kripto/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/crypto_list/bloc/crypto_list_bloc.dart';
+import 'features/favorites/bloc/favorites_bloc.dart';
 
 
 class CryptoApp extends StatelessWidget {
@@ -33,6 +36,12 @@ class CryptoApp extends StatelessWidget {
           create: (context) => CryptoCoinDetailsBloc(
             GetIt.I<AbstractCoinsRepository>(),
           ),
+        ),
+        BlocProvider(
+          create: (context) => FavoritesBloc(
+            favoritesRepository: GetIt.I<FavoritesRepository>(),
+            firebaseAuth: FirebaseAuth.instance,
+          )..add(LoadFavorites()),
         ),
       ],
       child: MaterialApp(

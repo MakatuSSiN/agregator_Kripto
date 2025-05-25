@@ -2,7 +2,9 @@ import 'package:agregator_kripto/features/crypto_list/widgets/crypto_coin_tile.d
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/view/auth_screen.dart';
+import '../../favorites/view/favorites_screen.dart';
 import '../bloc/crypto_list_bloc.dart';
 
 class CryptoListScreen extends StatefulWidget {
@@ -10,16 +12,21 @@ class CryptoListScreen extends StatefulWidget {
   final String title;
 
   @override
-  State<CryptoListScreen> createState() => _CryptoListScreenState();
+  CryptoListScreenState createState() => CryptoListScreenState();
 }
 
-class _CryptoListScreenState extends State<CryptoListScreen> {
+class CryptoListScreenState extends State<CryptoListScreen> {
   int _currentPageIndex = 0;
   final _searchController = TextEditingController();
   late final CryptoListBloc _cryptoListBloc;
-
+  void changePage(int index) {
+    setState(() {
+      _currentPageIndex = index;
+    });
+  }
   final List<Widget> _pages = [
     const _CryptoListContent(),
+    const FavoritesScreen(),
     const AuthScreen(),
   ];
 
@@ -28,6 +35,7 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
     super.initState();
     _cryptoListBloc = context.read<CryptoListBloc>();
     _cryptoListBloc.add(LoadCryptoList());
+
   }
 
   @override
@@ -35,7 +43,11 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
     _searchController.dispose();
     super.dispose();
   }
-
+  void setPageIndex(int index) {
+    setState(() {
+      _currentPageIndex = index;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,10 +64,12 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
           });
         },
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+        NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+        NavigationDestination(icon: Icon(Icons.star), label: 'Favorites'),
+        NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+      ],
+    ),
+
     );
   }
 

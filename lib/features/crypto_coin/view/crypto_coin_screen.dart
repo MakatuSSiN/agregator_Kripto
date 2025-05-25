@@ -3,6 +3,8 @@ import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_reposi
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin_details.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agregator_kripto/features/crypto_coin/bloc/crypto_coin_details/crypto_coin_details_bloc.dart';
@@ -10,6 +12,11 @@ import 'package:agregator_kripto/features/crypto_coin/widgets/widgets.dart';
 import 'package:agregator_kripto/features/crypto_coin/widgets/crypto_chart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'dart:async';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/view/auth_screen.dart';
+import '../../crypto_list/view/crypto_list_screen.dart';
+import '../../favorites/bloc/favorites_bloc.dart';
 
 class CryptoCoinScreen extends StatefulWidget {
   const CryptoCoinScreen({super.key});
@@ -26,10 +33,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   late final TrackballBehavior _trackballBehavior;
   bool _isDataLoaded = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey();
-
+  bool _isFavorite = false;
+  StreamSubscription? _favoritesSubscription;
   @override
   void initState() {
     super.initState();
+    _subscribeToFavorites();
     _coinDetailsBloc = CryptoCoinDetailsBloc(
       GetIt.I<AbstractCoinsRepository>(),
     );
@@ -51,7 +60,30 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ),
     );
   }
+  void _subscribeToFavorites() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
+    _favoritesSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted && coin != null) {
+        setState(() {
+          _isFavorite = snapshot.docs.any((doc) => doc.id == coin!.symbol);
+        });
+      }
+    });
+  }
+  @override
+  void dispose() {
+    _favoritesSubscription?.cancel();
+    _coinDetailsBloc.close();
+    _chartBloc?.close();
+    super.dispose();
+  }
   @override
   void didChangeDependencies() {
     final args = ModalRoute.of(context)?.settings.arguments;
@@ -66,9 +98,26 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       _chartBloc?.add(LoadCryptoChart(coin!.symbol));
     }
     super.didChangeDependencies();
+    _checkFavoriteStatus();
   }
 
+  void _checkFavoriteStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .doc(coin?.symbol)
+        .get();
+
+    if (mounted) {
+      setState(() {
+        _isFavorite = doc.exists;
+      });
+    }
+  }
   Future<void> _refreshData() async {
     if (coin != null) {
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
@@ -78,16 +127,38 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   }
 
   @override
-  void dispose() {
-    _chartBloc?.close();
-    _coinDetailsBloc.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: Icon(
+                _isFavorite ? Icons.star : Icons.star_border,
+                color: _isFavorite ? Colors.yellow : Colors.white,
+              ),
+              onPressed: () {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is! Authenticated) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please sign in to add favorites')),
+                  );
+                  // Используем Navigator вместо доступа к состоянию
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AuthScreen()),
+                  );
+                  return;
+                }
+
+                if (coin != null) {
+                  context.read<FavoritesBloc>().add(ToggleFavorite(coin!));
+                  setState(() {
+                    _isFavorite = !_isFavorite;
+                  });
+                }
+              },
+            ),
+          ],
           iconTheme: const IconThemeData(color: Colors.white),
           title: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
             bloc: _coinDetailsBloc,
@@ -209,6 +280,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   title: 'Low 24 Hour',
                   value: '${coinDetails.low24Hour.toStringAsFixed(2)} \$',
                 ),
+                const SizedBox(height: 6),
+
               ],
             ),
           ),
