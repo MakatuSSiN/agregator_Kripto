@@ -36,7 +36,7 @@ class CryptoChart extends StatelessWidget {
 
   Widget _buildChart(List<ChartSampleData> chartData) {
     return Container(
-      height: 300,
+      height: 350,
       width: 400,
       child: SfCartesianChart(
         zoomPanBehavior: zoomPanBehavior,
@@ -80,6 +80,7 @@ class CryptoChart extends StatelessWidget {
               width: 0.1,
               color: Colors.grey
           ),
+            labelPosition: ChartDataLabelPosition.inside,
             opposedPosition: true,
             maximumLabels: 1
         ),

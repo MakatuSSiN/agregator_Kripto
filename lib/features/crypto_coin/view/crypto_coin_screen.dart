@@ -87,7 +87,50 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(iconTheme: const IconThemeData(color: Colors.white)),
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
+            bloc: _coinDetailsBloc,
+            builder: (context, state) {
+              if (state is CryptoCoinDetailsLoaded) {
+                return Row(
+                  children: [
+                    SizedBox(
+                      width: 45,
+                      height: 45,
+                      child: Image.network(
+                        state.coinDetails.imageUrl,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.currency_bitcoin),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      state.coinDetails.name,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return const Text('Загрузка...');
+            },
+          ),
+          centerTitle: true,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              // gradient: LinearGradient(
+              //   colors: [
+              //     Colors.blue.shade900,
+              //     Colors.blue.shade700,
+              //   ],
+              ),
+            ),
+          ),
+
+
+        //),
     body: RefreshIndicator(
     key: _refreshIndicatorKey,
     onRefresh: _refreshData,
@@ -121,20 +164,28 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.network(coinDetails.imageUrl),
-          ),
+          // SizedBox(
+          //   height: 50,
+          //   width: 50,
+          //   child: Image.network(coinDetails.imageUrl),
+          // ),
+          // const SizedBox(height: 8),
+          // Text(
+          //   coinDetails.name,
+          //   style: const TextStyle(
+          //     fontSize: 26,
+          //     fontWeight: FontWeight.w700,
+          //   ),
+          // ),
           const SizedBox(height: 8),
-          Text(
-            coinDetails.name,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
+
+          BaseCard(
+            child: CryptoChart(
+              symbol: coin!.symbol,
+              zoomPanBehavior: _zoomPanBehavior,
+              trackballBehavior: _trackballBehavior,
             ),
           ),
-          const SizedBox(height: 8),
           BaseCard(
             child: Center(
               child: Text(
@@ -144,13 +195,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-          ),
-          BaseCard(
-            child: CryptoChart(
-              symbol: coin!.symbol,
-              zoomPanBehavior: _zoomPanBehavior,
-              trackballBehavior: _trackballBehavior,
             ),
           ),
           BaseCard(
