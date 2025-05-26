@@ -1,4 +1,5 @@
 import 'package:agregator_kripto/features/crypto_coin/bloc/crypto_chart/crypto_chart_bloc.dart';
+import 'package:agregator_kripto/features/utils/price_formatter.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
@@ -15,7 +16,6 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:async';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/view/auth_screen.dart';
-import '../../crypto_list/view/crypto_list_screen.dart';
 import '../../favorites/bloc/favorites_bloc.dart';
 
 class CryptoCoinScreen extends StatefulWidget {
@@ -176,7 +176,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      state.coinDetails.name,
+                      '${state.coinDetails.name}/USD',
                       style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -185,7 +185,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   ],
                 );
               }
-              return const Text('Загрузка...');
+              return const Text('Loading...');
             },
           ),
           centerTitle: true,
@@ -260,7 +260,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           BaseCard(
             child: Center(
               child: Text(
-                '${coinDetails.priceInUSD.toStringAsFixed(4)} \$',
+                '${formatCryptoPrice(coinDetails.priceInUSD)} \$',
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
@@ -273,12 +273,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               children: [
                 CryptoDataRow(
                   title: 'High 24 Hour',
-                  value: '${coinDetails.high24Hour.toStringAsFixed(2)} \$',
+                  value: '${formatCryptoPrice(coinDetails.high24Hour)} \$',
                 ),
                 const SizedBox(height: 6),
                 CryptoDataRow(
                   title: 'Low 24 Hour',
-                  value: '${coinDetails.low24Hour.toStringAsFixed(2)} \$',
+                  value: '${formatCryptoPrice(coinDetails.low24Hour)} \$',
                 ),
                 const SizedBox(height: 6),
 
@@ -289,6 +289,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ),
     );
   }
+
+
+
+
 }
 
 

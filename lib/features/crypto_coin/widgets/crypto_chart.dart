@@ -74,15 +74,19 @@ class CryptoChart extends StatelessWidget {
           labelStyle: const TextStyle(color: Colors.white),
         ),
         primaryYAxis: NumericAxis(
-          numberFormat: NumberFormat.simpleCurrency(decimalDigits: 2),
-          labelStyle: const TextStyle(color: Colors.white),
+          numberFormat: NumberFormat.currency(
+            symbol: '',
+            decimalDigits: _getDecimalDigits(_getCurrentPriceRange(chartData)),
+          ),//_getDecimalDigits(_getCurrentPriceRange(chartData)),),
+          labelStyle: const TextStyle(color: Colors.grey),
           majorGridLines: const MajorGridLines(
               width: 0.1,
               color: Colors.grey
           ),
             labelPosition: ChartDataLabelPosition.inside,
             opposedPosition: true,
-            maximumLabels: 1
+            maximumLabels: 1,
+            edgeLabelPlacement: EdgeLabelPlacement.hide
         ),
         // indicators: [
         //   RocIndicator<dynamic, dynamic>(
@@ -91,6 +95,26 @@ class CryptoChart extends StatelessWidget {
         //   ),
         // ],
       ),
+
+
+
+
     );
+
+
+
   }
+
+  int _getDecimalDigits(double maxPrice) {
+    if (maxPrice >= 1000) return 0;
+    if (maxPrice >= 10) return 2;
+    return 3;
+  }
+
+  double _getCurrentPriceRange(List<ChartSampleData> data) {
+    if (data.isEmpty) return 0;
+    final prices = data.map((d) => d.high).toList();
+    return prices.reduce((a, b) => a > b ? a : b);
+  }
+
 }

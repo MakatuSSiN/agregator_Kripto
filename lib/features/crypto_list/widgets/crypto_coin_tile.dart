@@ -1,3 +1,4 @@
+import 'package:agregator_kripto/features/utils/price_formatter.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +34,7 @@ class CryptoCoinTile extends StatelessWidget {
         style: theme.textTheme.bodyMedium,
       ),
       subtitle: Text(
-        "${coin.priceInUSD.toStringAsFixed(2)} \$ (${coin.symbol})",
+        "${formatCryptoPrice(coin.priceInUSD)} \$",
         style: theme.textTheme.labelSmall,
       ),
       trailing: IconButton(
