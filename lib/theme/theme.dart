@@ -25,7 +25,36 @@ final darkTheme = ThemeData(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w800
-        )
+        ),
+        iconTheme: const IconThemeData(color: Colors.white)
+    ),
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: Colors.grey.shade800,
+    indicatorColor: Colors.yellow,
+    labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
+          (Set<WidgetState> states) {
+        return TextStyle(
+          color: states.contains(WidgetState.selected)
+              ? Colors.yellow
+              : Colors.white.withValues(alpha: 0.4),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        );
+      },
+    ),
+    iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
+          (Set<WidgetState> states) {
+        return IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? Colors.grey.shade800
+              : Colors.white.withValues(alpha: 0.4),
+          size: 24,
+        );
+      },
+    ),
+  ),
+    cardTheme: CardTheme(
+        color: Colors.black
     )
 );
 
@@ -49,17 +78,40 @@ final lightTheme = ThemeData(
   ),
   appBarTheme: AppBarTheme(
       elevation: 0,
-      backgroundColor: Colors.blue.shade700,
+      backgroundColor: Colors.grey.shade50,
       titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: Colors.black,
           fontSize: 20,
           fontWeight: FontWeight.w800
       ),
-      iconTheme: const IconThemeData(color: Colors.white)
+      iconTheme: const IconThemeData(color: Colors.black)
   ),
-  bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: Colors.blue.shade700,
-    selectedItemColor: Colors.white,
-    unselectedItemColor: Colors.white.withValues(alpha: 0.6),
-  ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: Colors.grey.shade300,
+      indicatorColor: Colors.black,
+      labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
+            (Set<WidgetState> states) {
+          return TextStyle(
+            color: states.contains(WidgetState.selected)
+                ? Colors.black
+                : Colors.black.withValues(alpha: 0.4),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          );
+        },
+      ),
+      iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
+            (Set<WidgetState> states) {
+          return IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? Colors.grey.shade50
+                : Colors.black.withValues(alpha: 0.4),
+            size: 24,
+          );
+        },
+      ),
+    ),
+  cardTheme: CardTheme(
+    color: Colors.grey.shade300
+  )
 );

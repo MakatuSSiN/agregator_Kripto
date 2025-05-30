@@ -10,18 +10,18 @@ part 'crypto_list_state.dart';
 class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
   final AbstractCoinsRepository coinsRepository;
   List<CryptoCoin> _allCoins = [];
-  late Timer _timer;
+  //late Timer _timer;
 
   CryptoListBloc(this.coinsRepository) : super(CryptoListInitial()) {
     on<LoadCryptoList>(_load);
     on<SearchCryptoList>(_search);
-    _startAutoRefresh();
+    //_startAutoRefresh();
   }
-  void _startAutoRefresh() {
-    _timer = Timer.periodic(const Duration(seconds: 100), (timer) {
-      add(LoadCryptoList());
-    });
-  }
+  // void _startAutoRefresh() {
+  //   _timer = Timer.periodic(const Duration(seconds: 100), (timer) {
+  //     add(LoadCryptoList());
+  //   });
+  // }
   Future<void> _load(
       LoadCryptoList event,
       Emitter<CryptoListState> emit,
@@ -64,7 +64,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     ));
     @override
     Future<void> close() {
-      _timer.cancel(); // Отменяем таймер при закрытии BLoC
+      //_timer.cancel(); // Отменяем таймер при закрытии BLoC
       return super.close();
     }
   }

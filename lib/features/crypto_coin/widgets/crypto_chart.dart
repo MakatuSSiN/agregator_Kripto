@@ -27,14 +27,14 @@ class CryptoChart extends StatelessWidget {
           return Center(child: Text(state.message));
         } else if (state is CryptoChartLoaded) {
           final chartData = state.chartData;
-          return _buildChart(chartData);
+          return _buildChart(chartData, context);
         }
         return const SizedBox();
       },
     );
   }
 
-  Widget _buildChart(List<ChartSampleData> chartData) {
+  Widget _buildChart(List<ChartSampleData> chartData, BuildContext context) {
     return Container(
       height: 350,
       width: 400,
@@ -71,14 +71,18 @@ class CryptoChart extends StatelessWidget {
               width: 0.1,
             color: Colors.grey
           ),
-          labelStyle: const TextStyle(color: Colors.white),
+          labelStyle: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color, // Цвет текста оси X
+          ),
         ),
         primaryYAxis: NumericAxis(
           numberFormat: NumberFormat.currency(
             symbol: '',
             decimalDigits: _getDecimalDigits(_getCurrentPriceRange(chartData)),
           ),//_getDecimalDigits(_getCurrentPriceRange(chartData)),),
-          labelStyle: const TextStyle(color: Colors.grey),
+          labelStyle: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
           majorGridLines: const MajorGridLines(
               width: 0.1,
               color: Colors.grey
@@ -86,8 +90,13 @@ class CryptoChart extends StatelessWidget {
             labelPosition: ChartDataLabelPosition.inside,
             opposedPosition: true,
             maximumLabels: 1,
-            edgeLabelPlacement: EdgeLabelPlacement.hide
+            edgeLabelPlacement: EdgeLabelPlacement.hide,
+
+
         ),
+        borderWidth: 0,
+        plotAreaBorderWidth: 0,
+        margin: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
         // indicators: [
         //   RocIndicator<dynamic, dynamic>(
         //     period: 1,

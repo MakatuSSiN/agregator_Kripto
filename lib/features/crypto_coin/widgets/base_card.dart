@@ -16,7 +16,7 @@ class BaseCard extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: const Color.fromARGB(255, 21, 21, 21),
+        color: Theme.of(context).cardTheme.color,
       ),
       child: child,
     );

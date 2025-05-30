@@ -134,7 +134,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             IconButton(
               icon: Icon(
                 _isFavorite ? Icons.star : Icons.star_border,
-                color: _isFavorite ? Colors.yellow : Colors.white,
+                color: _isFavorite ? Colors.yellow : Theme.of(context).appBarTheme.iconTheme?.color,
               ),
               onPressed: () {
                 final authState = context.read<AuthBloc>().state;
@@ -159,7 +159,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               },
             ),
           ],
-          iconTheme: const IconThemeData(color: Colors.white),
+          //iconTheme: const IconThemeData(color: Colors.white),
           title: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
             bloc: _coinDetailsBloc,
             builder: (context, state) {

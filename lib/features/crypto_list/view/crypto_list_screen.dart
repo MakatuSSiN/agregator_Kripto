@@ -53,7 +53,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _currentPageIndex == 0 ? _buildAppBar() : null,
+      appBar: _currentPageIndex == 0 ? _buildAppBar(context) : null,
       body: IndexedStack(
         index: _currentPageIndex,
         children: _pages,
@@ -61,6 +61,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
       bottomNavigationBar: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) { // Получаем authState здесь
           return NavigationBar(
+            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
             selectedIndex: _currentPageIndex,
             onDestinationSelected: (index) {
               if (index == 1 && authState is! Authenticated) {
@@ -76,7 +77,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
             destinations: const [
               NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
               NavigationDestination(icon: Icon(Icons.star), label: 'Favorites'),
-              NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+              NavigationDestination(icon: Icon(Icons.person), label: 'Profile',),
             ],
           );
         },
@@ -84,7 +85,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(widget.title),
       actions: [
@@ -104,7 +105,8 @@ class CryptoListScreenState extends State<CryptoListScreen> {
                   onChanged: (value) {
                     themeProvider.toggleTheme(value);
                   },
-                  activeColor: Colors.blue,
+                  activeColor: Colors.yellow,
+                  inactiveThumbColor: Colors.black,
                 ),
               ],
             );
@@ -117,7 +119,9 @@ class CryptoListScreenState extends State<CryptoListScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
             controller: _searchController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color, // Цвет текста оси X
+            ),
             decoration: InputDecoration(
               hintText: 'Search cryptocurrencies...',
               prefixIcon: const Icon(Icons.search),
