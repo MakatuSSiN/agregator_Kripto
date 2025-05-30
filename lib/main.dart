@@ -3,6 +3,7 @@ import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_reposi
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_candle_repository.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_coins_repository.dart';
 import 'package:agregator_kripto/repositories/favorites_repository.dart';
+import 'package:agregator_kripto/theme/theme_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/repositories/auth_repository.dart';
@@ -26,7 +28,11 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
   _setupDependencies();
-  runApp(const CryptoApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeProvider(),
+    child: const CryptoApp()
+  )
+  );
 }
 void _setupDependencies() {
 
