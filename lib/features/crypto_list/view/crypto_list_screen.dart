@@ -1,6 +1,8 @@
 import 'package:agregator_kripto/features/crypto_list/widgets/crypto_coin_tile.dart';
+import 'package:agregator_kripto/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/view/auth_screen.dart';
@@ -85,6 +87,30 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       title: Text(widget.title),
+      actions: [
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.nightlight_round
+                      : Icons.wb_sunny,
+                ),
+                const SizedBox(width: 8),
+                Switch(
+                  value: themeProvider.themeMode == ThemeMode.dark,
+                  onChanged: (value) {
+                    themeProvider.toggleTheme(value);
+                  },
+                  activeColor: Colors.blue,
+                ),
+              ],
+            );
+          },
+        ),
+      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Padding(
