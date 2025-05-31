@@ -19,7 +19,7 @@ class CryptoChartBloc extends Bloc<CryptoChartEvent, CryptoChartState> {
       ) async {
     emit(CryptoChartLoading());
     try {
-      final chartData = await repository.getChartData(event.symbol);
+      final chartData = await repository.getChartData(event.symbol, event.timeFrame);
       emit(CryptoChartLoaded(chartData));
     } catch (e) {
       emit(CryptoChartError(e.toString()));
