@@ -10,31 +10,47 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        if (authState is! Authenticated) {
-          return _buildUnauthenticatedView(context);
-        }
+    return BlocListener<AuthBloc, AuthState>(
+        listener: (context, authState) {
+      if (authState is Authenticated) {
+        // При изменении состояния аутентификации загружаем избранное
+        context.read<FavoritesBloc>().add(LoadFavorites());
+      }
+    },
+    child: BlocListener<FavoritesBloc, FavoritesState>(
+    listener: (context, state) {
+    if (state is FavoritesError) {
+    ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(state.message)),
+    );
+    }
+    },
+    child: BlocBuilder<AuthBloc, AuthState>(
+    builder: (context, authState) {
+    if (authState is! Authenticated) {
+    return _buildUnauthenticatedView(context);
+    }
 
-        return BlocBuilder<FavoritesBloc, FavoritesState>(
-          builder: (context, state) {
-            if (state is FavoritesLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return BlocBuilder<FavoritesBloc, FavoritesState>(
+    builder: (context, state) {
+    if (state is FavoritesLoading) {
+    return const Center(child: CircularProgressIndicator());
+    }
 
-            if (state is FavoritesError) {
-              return Center(child: Text(state.message));
-            }
+    if (state is FavoritesError) {
+    return Center(child: Text(state.message));
+    }
 
-            if (state is FavoritesLoaded) {
-              return _buildFavoritesList(context, state.favorites);
-            }
+    if (state is FavoritesLoaded) {
+    return _buildFavoritesList(context, state.favorites);
+    }
 
-            return const Center(child: Text('Loading...'));
+    return const Center(child: Text('Loading...'));
           },
         );
       },
-    );
+    )
+    ));
   }
 
   Widget _buildUnauthenticatedView(BuildContext context) {

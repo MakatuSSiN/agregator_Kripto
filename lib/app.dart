@@ -29,6 +29,10 @@ class CryptoApp extends StatelessWidget {
           create: (context) => AuthBloc(GetIt.I<AuthRepository>())
             ..add(AuthCheckRequested()),
         ),
+        BlocProvider(
+          create: (context) => CryptoListBloc(GetIt.I<AbstractCoinsRepository>())
+            ..add(LoadCryptoList()),
+        ),
         // FavoritesBloc зависит от аутентификации
         BlocProvider(
           create: (context) => FavoritesBloc(
@@ -37,10 +41,6 @@ class CryptoApp extends StatelessWidget {
           ),
         ),
         // Остальные BLoCs
-        BlocProvider(
-          create: (context) => CryptoListBloc(GetIt.I<AbstractCoinsRepository>())
-            ..add(LoadCryptoList()),
-        ),
         BlocProvider(
           create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>()),
         ),

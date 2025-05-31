@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
+import '../repositories/auth_repository.dart';
 import '../view/auth_screen.dart';
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key});
@@ -164,24 +165,23 @@ class _AuthFormState extends State<AuthForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   try {
-                    // Проверяем подтверждение email
                     await FirebaseAuth.instance.currentUser?.reload();
                     final user = FirebaseAuth.instance.currentUser;
 
                     if (user?.emailVerified ?? false) {
-                      // Если email подтвержден, входим
-                      context.read<AuthBloc>().add(
-                        SignInRequested(_emailController.text, _passwordController.text),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Email successfully verified!')),
                       );
+                      // Очищаем возможные предыдущие ошибки
+                      context.read<AuthBloc>().add(AuthCheckRequested());
                     } else {
-                      // Если не подтвержден, показываем сообщение
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please verify your email first')),
                       );
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: ${e.toString()}')),
+                      SnackBar(content: Text('Error: ${e is AuthException ? e.message : e.toString()}')),
                     );
                   }
                 },

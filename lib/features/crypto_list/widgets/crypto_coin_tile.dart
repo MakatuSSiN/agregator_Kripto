@@ -19,9 +19,9 @@ class CryptoCoinTile extends StatelessWidget {
 
     return BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
-      final isFavorite = state is FavoritesLoaded
-          ? state.favorites.any((c) => c.symbol == coin.symbol)
-          : coin.isFavorite;
+          final isFavorite = state is FavoritesLoaded
+              ? state.favorites.any((c) => c.symbol == coin.symbol)
+              : false;
     final theme = Theme.of(context);
     return ListTile(
       leading: SizedBox(
@@ -38,15 +38,14 @@ class CryptoCoinTile extends StatelessWidget {
         style: theme.textTheme.labelSmall,
       ),
       trailing: IconButton(
-      icon: Icon(
-      isFavorite ? Icons.star : Icons.star_border,
-      color: isFavorite ? Colors.yellow : Colors.grey,
-    ),
-    onPressed: () {
-    context.read<FavoritesBloc>().add(
-    ToggleFavorite(coin.copyWith(isFavorite: isFavorite)),
-    );
-    },
+        icon: Icon(
+          isFavorite ? Icons.star : Icons.star_border,
+          color: isFavorite ? Colors.yellow : Colors.grey,
+        ),
+        onPressed: () {
+          final newCoin = coin.copyWith(isFavorite: !isFavorite);
+          context.read<FavoritesBloc>().add(ToggleFavorite(newCoin));
+        },
       ),
       onTap: () {
         Navigator.of(context).pushNamed(

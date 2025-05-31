@@ -52,11 +52,11 @@ void _setupDependencies() {
       firebaseAuth: FirebaseAuth.instance,
     ),
   );
-  getIt.registerFactory<FavoritesBloc>(
-          () => FavoritesBloc(
+  getIt.registerLazySingleton<FavoritesBloc>(
+        () => FavoritesBloc(
       favoritesRepository: getIt<FavoritesRepository>(),
-  firebaseAuth: FirebaseAuth.instance,
-          ),
+      firebaseAuth: FirebaseAuth.instance,
+    )..add(LoadFavorites()),
   );
 }
 

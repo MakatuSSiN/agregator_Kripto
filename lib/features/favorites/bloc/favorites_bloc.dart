@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -13,7 +12,7 @@ part 'favorites_state.dart';
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final FavoritesRepository favoritesRepository;
   final FirebaseAuth firebaseAuth;
-  StreamSubscription? _favoritesSubscription;
+  StreamSubscription<List<CryptoCoin>>? _favoritesSubscription;
 
   FavoritesBloc({
     required this.favoritesRepository,
@@ -22,23 +21,36 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     on<LoadFavorites>(_loadFavorites);
     on<ToggleFavorite>(_toggleFavorite);
     on<FavoritesUpdated>(_onFavoritesUpdated);
-
     _subscribeToFavorites();
   }
-
+  @override
+  void onChange(Change<FavoritesState> change) {
+    super.onChange(change);
+    if (change.nextState is FavoritesLoaded && _favoritesSubscription == null) {
+      _subscribeToFavorites();
+    }
+  }
   void _subscribeToFavorites() {
     _favoritesSubscription?.cancel();
+
+    final user = firebaseAuth.currentUser;
+    if (user == null) {
+      add(FavoritesUpdated([], isAuthenticated: false));
+      return;
+    }
+
     _favoritesSubscription = favoritesRepository.watchFavorites().listen(
           (favorites) {
-        if (favorites.isEmpty && firebaseAuth.currentUser == null) {
-          add(FavoritesUpdated([], isAuthenticated: false));
-        } else {
-          add(FavoritesUpdated(favorites));
-        }
+        if (isClosed) return;
+        add(FavoritesUpdated(favorites));
       },
-      onError: (error) => add(FavoritesUpdated([], error: error.toString())),
+      onError: (error) {
+        if (isClosed) return;
+        add(FavoritesUpdated([], error: error.toString()));
+      },
     );
   }
+
 
   void _onFavoritesUpdated(FavoritesUpdated event, Emitter<FavoritesState> emit) {
     if (event.error != null) {
@@ -53,15 +65,26 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       Emitter<FavoritesState> emit,
       ) async {
     try {
-      if (event.coin.isFavorite) {
-        await favoritesRepository.removeFavorite(event.coin);
-      } else {
-        await favoritesRepository.addFavorite(event.coin);
+      if (state is FavoritesLoaded) {
+        final currentFavorites = (state as FavoritesLoaded).favorites;
+        final isFavorite = currentFavorites.any((c) => c.symbol == event.coin.symbol);
+
+        if (isFavorite) {
+          await favoritesRepository.removeFavorite(event.coin);
+        } else {
+          await favoritesRepository.addFavorite(event.coin);
+        }
+
+        // Немедленно обновляем состояние
+        final updatedFavorites = await favoritesRepository.getFavorites();
+        emit(FavoritesLoaded(updatedFavorites));
       }
     } catch (e) {
       emit(FavoritesError(e.toString()));
+      add(LoadFavorites());
     }
   }
+
   Future<void> _loadFavorites(
       LoadFavorites event,
       Emitter<FavoritesState> emit,
@@ -79,6 +102,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       emit(FavoritesError(e.toString()));
     }
   }
+
   @override
   Future<void> close() {
     _favoritesSubscription?.cancel();
