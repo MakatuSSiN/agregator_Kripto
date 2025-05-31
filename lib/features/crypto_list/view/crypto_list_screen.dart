@@ -124,6 +124,9 @@ class CryptoListScreenState extends State<CryptoListScreen> {
             ),
             decoration: InputDecoration(
               hintText: 'Search cryptocurrencies...',
+              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              ),
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

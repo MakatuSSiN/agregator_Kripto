@@ -55,7 +55,23 @@ final darkTheme = ThemeData(
   ),
     cardTheme: CardTheme(
         color: Colors.black
-    )
+    ),
+  segmentedButtonTheme: SegmentedButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.yellow;
+        }
+        return Colors.grey.shade900;
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.grey.shade900;
+        }
+        return Colors.white.withValues(alpha: 0.4);
+      }),
+    ),
+  ),
 );
 
 final lightTheme = ThemeData(
@@ -113,5 +129,21 @@ final lightTheme = ThemeData(
     ),
   cardTheme: CardTheme(
     color: Colors.grey.shade300
-  )
-);
+  ),
+  segmentedButtonTheme: SegmentedButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.grey.shade300;
+        }
+        return Colors.grey.shade50;
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.black;
+        }
+        return Colors.black.withValues(alpha: 0.6);
+      }),
+    ),
+    ),
+  );

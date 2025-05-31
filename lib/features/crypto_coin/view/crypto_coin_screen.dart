@@ -26,6 +26,7 @@ class CryptoCoinScreen extends StatefulWidget {
 }
 
 class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
+  TimeFrame _selectedTimeFrame = TimeFrame.minute;
   CryptoCoin? coin;
   late final CryptoCoinDetailsBloc _coinDetailsBloc;
   CryptoChartBloc? _chartBloc;
@@ -95,7 +96,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       coin = args;
       _isDataLoaded = false;
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
-      _chartBloc?.add(LoadCryptoChart(coin!.symbol));
+      _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
     }
     super.didChangeDependencies();
     _checkFavoriteStatus();
@@ -248,6 +249,26 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           //     fontWeight: FontWeight.w700,
           //   ),
           // ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: SegmentedButton<TimeFrame>(
+              segments: TimeFrame.values.map((timeFrame) {
+                return ButtonSegment<TimeFrame>(
+                  value: timeFrame,
+                  label: Text(timeFrame.displayName),
+                );
+              }).toList(),
+              selected: {_selectedTimeFrame},
+              onSelectionChanged: (Set<TimeFrame> newSelection) {
+                setState(() {
+                  _selectedTimeFrame = newSelection.first;
+                  // Перезагружаем график с новым таймфреймом
+                  _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
+                });
+              },
+            ),
+          ),
+
           const SizedBox(height: 8),
 
           BaseCard(

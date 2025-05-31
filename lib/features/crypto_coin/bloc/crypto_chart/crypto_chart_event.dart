@@ -9,9 +9,21 @@ abstract class CryptoChartEvent extends Equatable {
 
 class LoadCryptoChart extends CryptoChartEvent {
   final String symbol;
+  final TimeFrame timeFrame;
 
-  const LoadCryptoChart(this.symbol);
+  const LoadCryptoChart(this.symbol, {this.timeFrame = TimeFrame.minute});
 
   @override
-  List<Object> get props => [symbol];
+  List<Object> get props => [symbol, timeFrame];
+}
+
+enum TimeFrame {
+  minute('1m', 'Минутный'),
+  hour('1h', 'Часовой'),
+  day('1d', 'Дневной');
+
+  final String apiValue;
+  final String displayName;
+
+  const TimeFrame(this.apiValue, this.displayName);
 }
