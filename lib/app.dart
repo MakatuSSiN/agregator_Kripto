@@ -24,12 +24,22 @@ class CryptoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // AuthBloc должен быть первым, так как от него зависят другие BLoCs
+        BlocProvider(
+          create: (context) => AuthBloc(GetIt.I<AuthRepository>())
+            ..add(AuthCheckRequested()),
+        ),
+        // FavoritesBloc зависит от аутентификации
+        BlocProvider(
+          create: (context) => FavoritesBloc(
+            favoritesRepository: GetIt.I<FavoritesRepository>(),
+            firebaseAuth: FirebaseAuth.instance,
+          ),
+        ),
+        // Остальные BLoCs
         BlocProvider(
           create: (context) => CryptoListBloc(GetIt.I<AbstractCoinsRepository>())
             ..add(LoadCryptoList()),
-        ),
-        BlocProvider(
-          create: (context) => AuthBloc(GetIt.I<AuthRepository>()),
         ),
         BlocProvider(
           create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>()),
@@ -39,12 +49,6 @@ class CryptoApp extends StatelessWidget {
             GetIt.I<AbstractCoinsRepository>(),
           ),
         ),
-        BlocProvider(
-          create: (context) => FavoritesBloc(
-            favoritesRepository: GetIt.I<FavoritesRepository>(),
-            firebaseAuth: FirebaseAuth.instance,
-          )..add(LoadFavorites()),
-        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -53,7 +57,7 @@ class CryptoApp extends StatelessWidget {
             title: 'CRYPTO APP',
             theme: lightTheme,
             darkTheme: darkTheme,
-            themeMode: themeProvider.themeMode, // Используем текущую тему из провайдера
+            themeMode: themeProvider.themeMode,
             initialRoute: '/',
             routes: routes,
           );

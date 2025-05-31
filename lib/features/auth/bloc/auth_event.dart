@@ -33,3 +33,13 @@ class ResendVerificationRequested extends AuthEvent {
   @override
   List<Object> get props => [email];
 }
+class LoadFavoritesRequested extends AuthEvent {
+  @override
+  // TODO: implement props
+  List<Object?> get props => throw UnimplementedError();
+}
+class AuthCheckRequested extends AuthEvent {
+  @override
+  // TODO: implement props
+  List<Object?> get props => throw UnimplementedError();
+}
