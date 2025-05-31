@@ -18,12 +18,13 @@ class LoadCryptoChart extends CryptoChartEvent {
 }
 
 enum TimeFrame {
-  minute('1m', 'Минутный'),
-  hour('1h', 'Часовой'),
-  day('1d', 'Дневной');
+  minute('1m', '1Minute', 120),
+  hour('1h', '1Hour', 48),
+  day('1d', '1Day', 60);
 
   final String apiValue;
   final String displayName;
+  final int candleCount;
 
-  const TimeFrame(this.apiValue, this.displayName);
+  const TimeFrame(this.apiValue, this.displayName, this.candleCount);
 }

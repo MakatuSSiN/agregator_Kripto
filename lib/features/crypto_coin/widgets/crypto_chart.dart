@@ -35,6 +35,7 @@ class CryptoChart extends StatelessWidget {
   }
 
   Widget _buildChart(List<ChartSampleData> chartData, BuildContext context) {
+    final dateFormat = _getDateFormatForTimeFrame(chartData);
     return Container(
       height: 350,
       width: 400,
@@ -66,7 +67,7 @@ class CryptoChart extends StatelessWidget {
           )
         ],
         primaryXAxis: DateTimeAxis(
-          dateFormat: DateFormat.Hm(),
+          dateFormat: dateFormat,
           majorGridLines: const MajorGridLines(
               width: 0.1,
             color: Colors.grey
@@ -89,8 +90,10 @@ class CryptoChart extends StatelessWidget {
           ),
             labelPosition: ChartDataLabelPosition.inside,
             opposedPosition: true,
-            maximumLabels: 1,
+            maximumLabels: 3,
             edgeLabelPlacement: EdgeLabelPlacement.hide,
+          rangePadding: ChartRangePadding.additional,
+          //interval: _calculateYInterval(chartData),
 
 
         ),
@@ -114,6 +117,24 @@ class CryptoChart extends StatelessWidget {
 
   }
 
+  DateFormat _getDateFormatForTimeFrame(List<ChartSampleData> chartData) {
+    if (chartData.isEmpty) return DateFormat.Hm(); // Формат по умолчанию
+
+    // Определяем разницу между первой и последней датой
+    final firstDate = chartData.first.x;
+    final lastDate = chartData.last.x;
+    final difference = lastDate.difference(firstDate).abs();
+
+    // Если разница больше 7 дней - используем формат с датой
+    if (difference.inDays > 7) {
+      return DateFormat.MMMd(); // Например: "Jan 10", "Feb 15"
+    }
+    // Для внутридневных данных используем часы:минуты
+    else {
+      return DateFormat.Hm(); // Например: "14:30", "09:15"
+    }
+  }
+
   int _getDecimalDigits(double maxPrice) {
     if (maxPrice >= 1000) return 0;
     if (maxPrice >= 10) return 2;
@@ -125,5 +146,19 @@ class CryptoChart extends StatelessWidget {
     final prices = data.map((d) => d.high).toList();
     return prices.reduce((a, b) => a > b ? a : b);
   }
+
+
+  // double _calculateYInterval(List<ChartSampleData> data) {
+  //   if (data.isEmpty) return 1;
+  //   final priceRange = _getCurrentPriceRange(data);
+
+  //   // Автоматический расчет интервала в зависимости от диапазона цен
+  //   if (priceRange > 5000) return 1000;
+  //   if (priceRange > 100) return 10;
+  //   if (priceRange > 10) return 1;
+  //   if (priceRange > 1) return 0.1;
+  //   return 0.01;
+  // }
+
 
 }

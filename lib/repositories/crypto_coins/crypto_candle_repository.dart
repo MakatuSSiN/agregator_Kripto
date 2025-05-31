@@ -23,7 +23,7 @@ class CryptoCandleRepository {
       }
 
       final response = await dio.get(
-          "https://min-api.cryptocompare.com/data/v2/$endpoint?fsym=$symbol&tsym=USD&limit=30"
+          "https://min-api.cryptocompare.com/data/v2/$endpoint?fsym=$symbol&tsym=USD&limit=${timeFrame.candleCount}"
       );
 
       final data = response.data as Map<String, dynamic>;

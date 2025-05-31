@@ -39,12 +39,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedTimeFrame = TimeFrame.minute;
     _subscribeToFavorites();
     _coinDetailsBloc = CryptoCoinDetailsBloc(
       GetIt.I<AbstractCoinsRepository>(),
     );
 
     _chartBloc = CryptoChartBloc(GetIt.I<CryptoCandleRepository>());
+
+    _loadInitialChart();
 
     _zoomPanBehavior = ZoomPanBehavior(
         enablePinching: true,
@@ -61,6 +64,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ),
     );
   }
+
+  Future<void> _loadInitialChart() async {
+    if (coin != null) {
+      _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
+    }
+  }
+
   void _subscribeToFavorites() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -78,6 +88,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       }
     });
   }
+
   @override
   void dispose() {
     _favoritesSubscription?.cancel();
@@ -85,6 +96,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _chartBloc?.close();
     super.dispose();
   }
+
   @override
   void didChangeDependencies() {
     final args = ModalRoute.of(context)?.settings.arguments;
@@ -122,7 +134,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   Future<void> _refreshData() async {
     if (coin != null) {
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
-      _chartBloc?.add(LoadCryptoChart(coin!.symbol));
+      _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
       //context.read<CryptoChartBloc>().add(LoadCryptoChart(coin!.symbol));
     }
   }
@@ -249,8 +261,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           //     fontWeight: FontWeight.w700,
           //   ),
           // ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+          SizedBox(
+            width: 350,
             child: SegmentedButton<TimeFrame>(
               segments: TimeFrame.values.map((timeFrame) {
                 return ButtonSegment<TimeFrame>(
