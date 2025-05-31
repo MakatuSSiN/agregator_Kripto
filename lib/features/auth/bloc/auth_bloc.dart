@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:agregator_kripto/features/auth/repositories/auth_repository.dart';
 
+import '../../favorites/bloc/favorites_bloc.dart';
+
 part 'auth_event.dart';
 part 'auth_state.dart';
 
@@ -22,6 +24,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await authRepository.signIn(event.email, event.password);
       if (user != null) {
         if (user.emailVerified) {
+          // Добавляем загрузку избранных после успешного входа
+
           emit(Authenticated(user));
         } else {
           await authRepository.resendVerificationEmail();

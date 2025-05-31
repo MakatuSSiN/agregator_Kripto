@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
@@ -14,12 +17,35 @@ class _AuthFormState extends State<AuthForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLogin = true;
+  bool _canResendEmail = false;
+  int _resendCooldown = 120; // 120 секунд
+  Timer? _resendTimer;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _resendTimer?.cancel();
     super.dispose();
+  }
+  void _startResendTimer() {
+    setState(() {
+      _canResendEmail = false;
+      _resendCooldown = 120;
+    });
+
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _resendCooldown--;
+      });
+
+      if (_resendCooldown <= 0) {
+        _resendTimer?.cancel();
+        setState(() {
+          _canResendEmail = true;
+        });
+      }
+    });
   }
 
   @override
@@ -127,21 +153,58 @@ class _AuthFormState extends State<AuthForm> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(
-                  SignInRequested(_emailController.text, _passwordController.text),
-                );
+            BlocListener<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is AuthError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
               },
-              child: const Text('I have verified my email'),
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    // Проверяем подтверждение email
+                    await FirebaseAuth.instance.currentUser?.reload();
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user?.emailVerified ?? false) {
+                      // Если email подтвержден, входим
+                      context.read<AuthBloc>().add(
+                        SignInRequested(_emailController.text, _passwordController.text),
+                      );
+                    } else {
+                      // Если не подтвержден, показываем сообщение
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please verify your email first')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  }
+                },
+                child: const Text('I have verified my email'),
+              ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: _canResendEmail ? () {
                 context.read<AuthBloc>().add(
                   ResendVerificationRequested(email),
                 );
-              },
-              child: const Text('Resend verification email'),
+                _startResendTimer();
+              } : null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Resend verification email'),
+                  if (!_canResendEmail) ...[
+                    const SizedBox(width: 8),
+                    Text('($_resendCooldown)'),
+                  ],
+                ],
+              ),
             ),
           ],
         ),

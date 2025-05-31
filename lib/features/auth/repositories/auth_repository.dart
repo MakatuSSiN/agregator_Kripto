@@ -39,7 +39,15 @@ class AuthRepository {
   Future<void> resendVerificationEmail() async {
     final user = _firebaseAuth.currentUser;
     if (user != null) {
-      await user.sendEmailVerification();
+      try {
+        await user.sendEmailVerification();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'too-many-requests') {
+          throw AuthException('Please wait before resending');
+        } else {
+          throw AuthException(e.message ?? 'Failed to send verification email');
+        }
+      }
     } else {
       throw AuthException('No authenticated user');
     }
