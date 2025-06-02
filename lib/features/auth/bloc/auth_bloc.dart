@@ -38,7 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(Unauthenticated());
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(e is AuthException ? e.message : e.toString()));
     }
   }
   Future<void> _loadFavorites(LoadFavoritesRequested event, Emitter<AuthState> emit) async {
@@ -68,15 +68,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await authRepository.signIn(event.email, event.password);
       if (user != null) {
         if (user.emailVerified) {
-          // Добавляем загрузку избранных после успешного входа
-
           emit(Authenticated(user));
+          // Пересоздаем FavoritesBloc для активации подписки
+          getIt.resetLazySingleton<FavoritesBloc>();
+          getIt<FavoritesBloc>().add(LoadFavorites());
         } else {
           await authRepository.resendVerificationEmail();
           emit(EmailNotVerified(user.email ?? event.email));
         }
-      } else {
-        emit(Unauthenticated());
       }
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -91,14 +90,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(EmailVerificationSent(event.email));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(e is AuthException ? e.message : e.toString()));
     }
   }
 
   Future<void> _signOut(SignOutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    await authRepository.signOut();
-    emit(Unauthenticated());
+    try {
+      // Полностью сбрасываем состояние избранных
+      final favoritesBloc = getIt<FavoritesBloc>();
+      favoritesBloc.add(FavoritesUpdated([]));
+      await Future.delayed(Duration.zero); // Даем время на обработку
+
+      await authRepository.signOut();
+      emit(Unauthenticated());
+
+      // Пересоздаем FavoritesBloc для чистого состояния
+      getIt.resetLazySingleton<FavoritesBloc>();
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 
   Future<void> _resendVerification(
@@ -110,7 +121,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await authRepository.resendVerificationEmail();
       emit(EmailVerificationSent(event.email));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(e is AuthException ? e.message : e.toString()));
     }
   }
 }

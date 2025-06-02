@@ -62,6 +62,7 @@ class _UserProfile extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
+              context.read<FavoritesBloc>().add(FavoritesUpdated([]));
               context.read<AuthBloc>().add(SignOutRequested());
             },
             child: const Text('Sign Out'),

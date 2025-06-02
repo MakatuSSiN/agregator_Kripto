@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/view/auth_screen.dart';
+import '../../favorites/bloc/favorites_bloc.dart';
 import '../../favorites/view/favorites_screen.dart';
 import '../bloc/crypto_list_bloc.dart';
 
@@ -37,7 +38,12 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     super.initState();
     _cryptoListBloc = context.read<CryptoListBloc>();
     _cryptoListBloc.add(LoadCryptoList());
-
+// Слушаем изменения аутентификации
+    context.read<AuthBloc>().stream.listen((authState) {
+      if (authState is Unauthenticated) {
+        context.read<FavoritesBloc>().add(FavoritesUpdated([]));
+      }
+    });
   }
 
   @override
