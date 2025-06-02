@@ -11,6 +11,7 @@ class CryptoCoinDetail extends Equatable {
     required this.lastUpdate,
     required this.high24Hour,
     required this.low24Hour,
+    this.priceChangePercentage = 0.0,
   });
 
   final String name;
@@ -20,6 +21,7 @@ class CryptoCoinDetail extends Equatable {
   final DateTime lastUpdate;
   final double high24Hour;
   final double low24Hour;
+  final double priceChangePercentage;
 
   @override
   List<Object> get props => [
@@ -30,5 +32,6 @@ class CryptoCoinDetail extends Equatable {
     lastUpdate,
     high24Hour,
     low24Hour,
+    priceChangePercentage
   ];
 }

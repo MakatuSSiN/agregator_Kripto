@@ -37,6 +37,7 @@ class CryptoCoinsRepository implements AbstractCoinsRepository {
     final dataRaw = data['RAW'] as Map<String, dynamic>;
     final coinData = dataRaw[currencyCode] as Map<String, dynamic>;
     final usdData = coinData['USD'] as Map<String, dynamic>;
+    final changePct24Hour = usdData['CHANGEPCT24HOUR'] as double? ?? 0.0;
 
     return CryptoCoinDetail(
       name: currencyCode,
@@ -46,6 +47,7 @@ class CryptoCoinsRepository implements AbstractCoinsRepository {
       lastUpdate: DateTime.fromMillisecondsSinceEpoch(usdData['LASTUPDATE'] * 1000),
       high24Hour: usdData['HIGH24HOUR'],
       low24Hour: usdData['LOW24HOUR'],
+      priceChangePercentage: changePct24Hour,
     );
   }
 

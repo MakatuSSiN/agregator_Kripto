@@ -17,3 +17,20 @@ class LoadCryptoCoinDetails extends CryptoCoinDetailsEvent {
   @override
   List<Object> get props => super.props..add(currencyCode);
 }
+
+class StartAutoRefresh extends CryptoCoinDetailsEvent {
+  const StartAutoRefresh({
+    required this.currencyCode,
+    this.intervalSeconds = 10,
+  });
+
+  final String currencyCode;
+  final int intervalSeconds;
+
+  @override
+  List<Object> get props => super.props..addAll([currencyCode, intervalSeconds]);
+}
+
+class StopAutoRefresh extends CryptoCoinDetailsEvent {
+  const StopAutoRefresh();
+}

@@ -90,18 +90,11 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   }
 
   @override
-  void dispose() {
-    _favoritesSubscription?.cancel();
-    _coinDetailsBloc.close();
-    _chartBloc?.close();
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     final args = ModalRoute.of(context)?.settings.arguments;
     assert(args != null && args is CryptoCoin);
     coin = args as CryptoCoin;
+    _coinDetailsBloc.add(StartAutoRefresh(currencyCode: coin!.name));
     _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
     _chartBloc?.add(LoadCryptoChart(coin!.symbol));
     if (args != null && (coin == null || coin!.name != args.name)) {
@@ -112,6 +105,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     }
     super.didChangeDependencies();
     _checkFavoriteStatus();
+  }
+
+  @override
+  void dispose() {
+    _coinDetailsBloc.add(const StopAutoRefresh());
+    _favoritesSubscription?.cancel();
+    _coinDetailsBloc.close();
+    _chartBloc?.close();
+    super.dispose();
   }
 
   void _checkFavoriteStatus() async {
@@ -291,13 +293,38 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             ),
           ),
           BaseCard(
-            child: Center(
-              child: Text(
-                '${formatCryptoPrice(coinDetails.priceInUSD)} \$',
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: coinDetails.priceChangePercentage >= 0
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${coinDetails.priceChangePercentage >= 0 ? '+' : ''}${coinDetails.priceChangePercentage.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: coinDetails.priceChangePercentage >= 0
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
