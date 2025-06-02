@@ -28,7 +28,9 @@ class CryptoCoin extends Equatable {
     symbol: json['symbol'] as String,
     isFavorite: json['isFavorite'] as bool? ?? false,
   );
-  CryptoCoin copyWith({bool? isFavorite}) => CryptoCoin(
+  CryptoCoin copyWith({
+    bool? isFavorite,
+  }) => CryptoCoin(
     name: name,
     priceInUSD: priceInUSD,
     imageUrl: imageUrl,

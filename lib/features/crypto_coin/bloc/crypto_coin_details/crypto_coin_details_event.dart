@@ -21,7 +21,7 @@ class LoadCryptoCoinDetails extends CryptoCoinDetailsEvent {
 class StartAutoRefresh extends CryptoCoinDetailsEvent {
   const StartAutoRefresh({
     required this.currencyCode,
-    this.intervalSeconds = 10,
+    this.intervalSeconds = 12,
   });
 
   final String currencyCode;
