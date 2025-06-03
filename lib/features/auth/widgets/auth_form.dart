@@ -78,7 +78,9 @@ class _AuthFormState extends State<AuthForm> {
           children: [
             TextFormField(
               controller: _emailController,
-              style: const TextStyle(color: Colors.white),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 18,
+              ),
               decoration: const InputDecoration(labelText: 'Email',),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -93,7 +95,9 @@ class _AuthFormState extends State<AuthForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _passwordController,
-              style: const TextStyle(color: Colors.white),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 18,
+              ),
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
               validator: (value) {
@@ -114,6 +118,10 @@ class _AuthFormState extends State<AuthForm> {
               ),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
               onPressed: state is AuthLoading ? null : _submit,
               child: state is AuthLoading
                   ? const CircularProgressIndicator()
@@ -142,11 +150,15 @@ class _AuthFormState extends State<AuthForm> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.mark_email_read, size: 64),
+            const Icon(
+                Icons.mark_email_read,
+                size: 64,
+
+          ),
             const SizedBox(height: 24),
             Text(
               'Verification Email Sent',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             Text(
@@ -185,7 +197,7 @@ class _AuthFormState extends State<AuthForm> {
                     );
                   }
                 },
-                child: const Text('I have verified my email'),
+                child: Text('I have verified my email'),
               ),
             ),
             TextButton(

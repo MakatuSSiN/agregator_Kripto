@@ -50,22 +50,32 @@ class _UserProfile extends StatelessWidget {
                 ? NetworkImage(user.photoURL!)
                 : null,
             child: user.photoURL == null
-                ? Icon(Icons.person, size: 50)
+                ? Icon(
+                Icons.person,
+                size: 50,
+            color: Theme.of(context).colorScheme.onPrimary)
                 : null,
           ),
           const SizedBox(height: 16),
           Text(user.email ?? 'No email',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
+                //color: Theme.of(context).textTheme.bodyMedium?.color,
                 fontSize: 18,
               ),),
           const SizedBox(height: 24),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          ),
             onPressed: () {
               context.read<FavoritesBloc>().add(FavoritesUpdated([]));
               context.read<AuthBloc>().add(SignOutRequested());
             },
-            child: const Text('Sign Out'),
+            child: Text(
+              'Sign Out',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)
+            ),
           ),
         ],
       ),
