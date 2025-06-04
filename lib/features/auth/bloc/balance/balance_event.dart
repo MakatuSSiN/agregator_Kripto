@@ -26,3 +26,6 @@ class CheckBalance extends BalanceEvent {
   @override
   List<Object> get props => [amountToCheck];
 }
+class SubscribeToBalance extends BalanceEvent {
+  const SubscribeToBalance();
+}

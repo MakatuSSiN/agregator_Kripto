@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
@@ -9,6 +11,7 @@ part 'balance_state.dart';
 class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
   final FirebaseFirestore firestore;
   final FirebaseAuth firebaseAuth;
+  StreamSubscription? _balanceSubscription;
 
   BalanceBloc({
     required this.firestore,
@@ -16,8 +19,28 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
   }) : super(BalanceInitial()) {
     on<LoadBalance>(_loadBalance);
     on<UpdateBalance>(_updateBalance);
+    on<SubscribeToBalance>(_subscribeToBalance);
   }
+  Future<void> _subscribeToBalance(
+      SubscribeToBalance event,
+      Emitter<BalanceState> emit,
+      ) async {
+    await _balanceSubscription?.cancel();
+    final user = firebaseAuth.currentUser;
+    if (user == null) return;
 
+    _balanceSubscription = firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('balance')
+        .doc('USD')
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        add(LoadBalance());
+      }
+    });
+  }
   Future<void> _loadBalance(
       LoadBalance event,
       Emitter<BalanceState> emit,

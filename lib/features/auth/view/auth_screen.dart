@@ -51,6 +51,11 @@ class _UserProfile extends StatelessWidget {
         firestore: FirebaseFirestore.instance,
         firebaseAuth: FirebaseAuth.instance,
       )..add(LoadPortfolio()),
+    child: BlocProvider(
+    create: (context) => BalanceBloc(
+    firestore: FirebaseFirestore.instance,
+    firebaseAuth: FirebaseAuth.instance,
+    )..add(SubscribeToBalance()),
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -68,6 +73,7 @@ class _UserProfile extends StatelessWidget {
             _buildProfileInfo(context),
             _buildPortfolioList(),
           ],
+        ),
         ),
       ),
     ),

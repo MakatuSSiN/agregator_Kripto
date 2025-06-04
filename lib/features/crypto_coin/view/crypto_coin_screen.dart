@@ -333,11 +333,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                             coin!.symbol,
                             coinDetails,
                           );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Успешно куплено $amount ${coin!.symbol}')),
+                          );
                           Navigator.pop(context); // Закрываем только после успеха
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(e.toString())),
                           );
+                          Navigator.pop(context);
                         } finally {
                           setState(() => _isProcessing = false);
                         }
