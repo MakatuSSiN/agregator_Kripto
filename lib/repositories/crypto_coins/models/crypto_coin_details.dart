@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import 'models.dart';
-
 class CryptoCoinDetail extends Equatable {
   const CryptoCoinDetail({
     required this.name,

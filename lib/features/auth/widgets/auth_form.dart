@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../repositories/auth_repository.dart';
-import '../view/auth_screen.dart';
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key});
 
@@ -113,7 +112,7 @@ class _AuthFormState extends State<AuthForm> {
             const SizedBox(height: 24),
             if (state is AuthError)
               Text(
-                (state as AuthError).message,
+                (state).message,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             const SizedBox(height: 16),

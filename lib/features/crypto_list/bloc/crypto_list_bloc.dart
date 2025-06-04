@@ -42,8 +42,6 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
       Emitter<CryptoListState> emit,
       ) {
     if (state is! CryptoListLoaded) return;
-
-    final currentState = state as CryptoListLoaded;
     final query = event.query.toLowerCase();
 
     if (query.isEmpty) {
@@ -62,10 +60,5 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
       coinsList: _allCoins,
       filteredCoins: filtered,
     ));
-    @override
-    Future<void> close() {
-      //_timer.cancel(); // Отменяем таймер при закрытии BLoC
-      return super.close();
-    }
   }
 }
