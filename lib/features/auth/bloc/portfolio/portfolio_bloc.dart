@@ -61,7 +61,36 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       emit(PortfolioLoadFailure(e.toString()));
     }
   }
+  Future<void> reduceCryptoAmount(String coinSymbol, double amount) async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return;
 
+    await firestore.runTransaction((transaction) async {
+      final portfolioRef = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('portfolio')
+          .doc(coinSymbol);
+
+      final doc = await transaction.get(portfolioRef);
+      if (!doc.exists) throw Exception('Coin not found in portfolio');
+
+      final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
+      if (currentAmount < amount) throw Exception('Not enough coins to sell');
+
+      final newAmount = currentAmount - amount;
+
+      if (newAmount <= 0) {
+        // Если продали все монеты, удаляем документ
+        transaction.delete(portfolioRef);
+      } else {
+        transaction.update(portfolioRef, {
+          'amount': newAmount,
+          'lastPurchaseDate': DateTime.now(),
+        });
+      }
+    });
+  }
   @override
   Future<void> close() {
     _portfolioSubscription?.cancel();

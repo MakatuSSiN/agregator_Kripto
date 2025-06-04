@@ -195,6 +195,210 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     portfolioBloc.add(LoadPortfolio());
     balanceBloc.add(LoadBalance());
   }
+  Future<void> _processSale(
+      BuildContext context,
+      double amount,
+      double usdAmount,
+      String coinSymbol,
+      CryptoCoinDetail coinDetails,
+      ) async {
+    final balanceBloc = context.read<BalanceBloc>();
+    final portfolioBloc = context.read<PortfolioBloc>();
+    final user = FirebaseAuth.instance.currentUser!;
+
+    try {
+      // 1. Уменьшаем количество криптовалюты в портфеле
+      await (portfolioBloc as PortfolioBloc).reduceCryptoAmount(coinSymbol, amount);
+
+      // 2. Обновляем баланс (добавляем USD)
+      balanceBloc.add(SellCrypto(usdAmount, false));
+
+      // Ждём завершения обновления баланса
+      await balanceBloc.stream.firstWhere((state) =>
+      state is BalanceOperationSuccess || state is BalanceError);
+
+      if (balanceBloc.state is BalanceError) {
+        throw Exception((balanceBloc.state as BalanceError).message);
+      }
+
+      // Обновляем данные в UI
+      portfolioBloc.add(LoadPortfolio());
+      balanceBloc.add(LoadBalance());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Успешно продано $amount ${coin!.symbol}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+// Добавим метод для показа диалога продажи
+  void _showSellDialog(BuildContext context, CryptoCoinDetail coinDetails) {
+    final TextEditingController amountController = TextEditingController();
+    final TextEditingController usdController = TextEditingController();
+    final authState = context.read<AuthBloc>().state;
+    bool _isAmountFieldFocused = false;
+    bool _isUsdFieldFocused = false;
+    bool _isProcessing = false;
+
+    if (authState is! Authenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пожалуйста, войдите в систему для продажи')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+      );
+      return;
+    }
+
+    // Функция для обновления полей
+    void updateFields({bool fromAmount = true}) {
+      final price = coinDetails.priceInUSD;
+
+      if (fromAmount && _isAmountFieldFocused) {
+        final amountText = amountController.text;
+        if (amountText.isNotEmpty) {
+          final amount = double.tryParse(amountText) ?? 0;
+          usdController.text = (amount * price).toStringAsFixed(2);
+        } else {
+          usdController.clear();
+        }
+      } else if (!fromAmount && _isUsdFieldFocused) {
+        final usdText = usdController.text;
+        if (usdText.isNotEmpty) {
+          final usd = double.tryParse(usdText) ?? 0;
+          amountController.text = (usd / price).toStringAsFixed(8);
+        } else {
+          amountController.clear();
+        }
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Продать ${coinDetails.name}',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: 'Количество ${coin!.symbol}',
+                      border: const OutlineInputBorder(),
+                      suffixText: coin!.symbol,
+                    ),
+                    onChanged: (_) => updateFields(fromAmount: true),
+                    onTap: () {
+                      _isAmountFieldFocused = true;
+                      _isUsdFieldFocused = false;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: usdController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Сумма в USD',
+                      border: OutlineInputBorder(),
+                      suffixText: 'USD',
+                    ),
+                    onChanged: (_) => updateFields(fromAmount: false),
+                    onTap: () {
+                      _isAmountFieldFocused = false;
+                      _isUsdFieldFocused = true;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          onPressed: _isProcessing
+                              ? null
+                              : () => Navigator.pop(context),
+                          child: const Text('Отмена'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                          onPressed: _isProcessing
+                              ? null
+                              : () async {
+                            setState(() => _isProcessing = true);
+                            try {
+                              final amount = double.tryParse(amountController.text);
+                              final usdAmount = double.tryParse(usdController.text);
+
+                              if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
+                                throw Exception('Введите корректное количество');
+                              }
+
+                              await _processSale(
+                                context,
+                                amount,
+                                usdAmount,
+                                coin!.symbol,
+                                coinDetails,
+                              );
+                              Navigator.pop(context);
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            } finally {
+                              setState(() => _isProcessing = false);
+                            }
+                          },
+                          child: _isProcessing
+                              ? const CircularProgressIndicator()
+                              : const Text('Продать'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController usdController = TextEditingController();
@@ -559,20 +763,42 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           BaseCard(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                onPressed: () => _showBuyDialog(context, coinDetails),
-                child: const Text(
-                  'Купить',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      onPressed: () => _showBuyDialog(context, coinDetails),
+                      child: const Text(
+                        'Купить',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () => _showSellDialog(context, coinDetails),
+                      child: const Text(
+                        'Продать',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

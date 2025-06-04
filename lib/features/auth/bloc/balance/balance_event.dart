@@ -29,3 +29,12 @@ class CheckBalance extends BalanceEvent {
 class SubscribeToBalance extends BalanceEvent {
   const SubscribeToBalance();
 }
+class SellCrypto extends BalanceEvent {
+  final double amount;
+  final bool isSpending; // false для продажи
+
+  const SellCrypto(this.amount, this.isSpending);
+
+  @override
+  List<Object> get props => [amount, isSpending];
+}

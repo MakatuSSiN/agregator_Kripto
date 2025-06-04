@@ -19,7 +19,40 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
   }) : super(BalanceInitial()) {
     on<LoadBalance>(_loadBalance);
     on<UpdateBalance>(_updateBalance);
+    on<SellCrypto>(_sellCrypto);
     on<SubscribeToBalance>(_subscribeToBalance);
+  }
+  Future<void> _sellCrypto(
+      SellCrypto event,
+      Emitter<BalanceState> emit,
+      ) async {
+    try {
+      final user = firebaseAuth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final balanceRef = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('balance')
+          .doc('USD');
+
+      await firestore.runTransaction((transaction) async {
+        final doc = await transaction.get(balanceRef);
+        final currentBalance = (doc.data()?['amount'] ?? 0).toDouble();
+
+        // Для продажи добавляем сумму к балансу
+        final newBalance = currentBalance + event.amount;
+
+        transaction.update(balanceRef, {'amount': newBalance});
+        return newBalance;
+      });
+
+      final doc = await balanceRef.get();
+      emit(BalanceOperationSuccess(doc.data()!['amount']));
+    } catch (e) {
+      emit(BalanceError(e.toString()));
+      rethrow;
+    }
   }
   Future<void> _subscribeToBalance(
       SubscribeToBalance event,
