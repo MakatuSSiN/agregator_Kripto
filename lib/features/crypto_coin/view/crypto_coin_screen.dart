@@ -15,6 +15,8 @@ import 'package:get_it/get_it.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:async';
 import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/balance/balance_bloc.dart';
+import '../../auth/bloc/portfolio/portfolio_bloc.dart';
 import '../../auth/view/auth_screen.dart';
 import '../../favorites/bloc/favorites_bloc.dart';
 
@@ -131,6 +133,81 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       setState(() {
         _isFavorite = doc.exists;
       });
+    }
+  }
+  Future<void> _processPurchase(
+      BuildContext context,
+      double amount,
+      double usdAmount,
+      String coinSymbol,
+      CryptoCoinDetail coinDetails,
+      ) async {
+    try {
+      final balanceBloc = context.read<BalanceBloc>();
+      final portfolioBloc = context.read<PortfolioBloc>();
+      final user = FirebaseAuth.instance.currentUser!;
+
+      // 1. Проверяем баланс
+      final currentBalance = await balanceBloc.getCurrentBalance();
+      if (currentBalance < usdAmount) {
+        throw Exception('Недостаточно средств на балансе');
+      }
+
+      // 2. Обновляем баланс (без await, так как add не возвращает Future)
+      balanceBloc.add(UpdateBalance(usdAmount, true));
+
+      // Ждём завершения обновления баланса
+      await balanceBloc.stream.firstWhere((state) =>
+      state is BalanceOperationSuccess || state is BalanceError);
+
+      // Если была ошибка - выбрасываем исключение
+      if (balanceBloc.state is BalanceError) {
+        throw Exception((balanceBloc.state as BalanceError).message);
+      }
+
+      // 3. Добавляем в портфель
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final portfolioRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('portfolio')
+            .doc(coinSymbol);
+
+        final doc = await transaction.get(portfolioRef);
+
+        if (doc.exists) {
+          final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
+          transaction.update(portfolioRef, {
+            'amount': currentAmount + amount,
+            'lastPurchaseDate': DateTime.now(),
+          });
+        } else {
+          transaction.set(portfolioRef, {
+            'coinSymbol': coinSymbol,
+            'coinName': coinDetails.name,
+            'amount': amount,
+            'firstPurchaseDate': DateTime.now(),
+            'lastPurchaseDate': DateTime.now(),
+            'imageUrl': coinDetails.imageUrl,
+          });
+        }
+      });
+
+      // Обновляем данные в UI
+      portfolioBloc.add(LoadPortfolio());
+      balanceBloc.add(LoadBalance());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Успешно куплено $amount ${coinSymbol}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка: ${e.toString()}')),
+        );
+      }
     }
   }
   void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
@@ -250,57 +327,21 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       ),
                       onPressed: () async {
                         final amount = double.tryParse(amountController.text);
-                        if (amount == null || amount <= 0) {
+                        final usdAmount = double.tryParse(usdController.text);
+                        if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Введите корректное количество')),
                           );
                           return;
                         }
+                        await _processPurchase(
+                          context,
+                          amount,
+                          usdAmount,
+                          coin!.symbol,
+                          coinDetails,
+                        );
 
-                        try {
-                          final user = FirebaseAuth.instance.currentUser!;
-                          final docRef = FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(user.uid)
-                              .collection('portfolio')
-                              .doc(coin!.symbol);
-
-                          await FirebaseFirestore.instance.runTransaction(
-                                (transaction) async {
-                              final doc = await transaction.get(docRef);
-
-                              if (doc.exists) {
-                                final currentAmount = doc.data()?['amount'] ?? 0;
-                                transaction.update(docRef, {
-                                  'amount': currentAmount + amount,
-                                  'lastPurchaseDate': DateTime.now(),
-                                });
-                              } else {
-                                transaction.set(docRef, {
-                                  'coinSymbol': coin!.symbol,
-                                  'coinName': coinDetails.name,
-                                  'amount': amount,
-                                  'firstPurchaseDate': DateTime.now(),
-                                  'lastPurchaseDate': DateTime.now(),
-                                  'imageUrl': coinDetails.imageUrl,
-                                });
-                              }
-                            },
-                          );
-
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Успешно куплено $amount ${coin!.symbol}',
-                              ),
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ошибка: $e')),
-                          );
-                        }
                       },
                       child: const Text('Купить'),
                     ),

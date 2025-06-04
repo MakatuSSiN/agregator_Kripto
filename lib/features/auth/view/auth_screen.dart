@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import '../../../repositories/crypto_coins/abstract_coins_repository.dart';
 import '../../favorites/bloc/favorites_bloc.dart';
 import '../bloc/auth_bloc.dart';
+import '../bloc/balance/balance_bloc.dart';
 import '../bloc/portfolio/portfolio_bloc.dart';
 import '../widgets/auth_form.dart';
 
@@ -91,7 +92,24 @@ class _UserProfile extends StatelessWidget {
           Text(user.email ?? 'No email',
             style: const TextStyle(fontSize: 18),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          BlocBuilder<BalanceBloc, BalanceState>(
+            builder: (context, state) {
+              if (state is BalanceLoaded) {
+                return Text(
+                  'Баланс: ${state.amount.toStringAsFixed(2)} USD',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              } else if (state is BalanceError) {
+                return Text('Ошибка: ${state.message}');
+              }
+              return const CircularProgressIndicator();
+            },
+          ),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               context.read<FavoritesBloc>().add(FavoritesUpdated([]));

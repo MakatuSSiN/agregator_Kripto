@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/bloc/auth_bloc.dart';
+import 'features/auth/bloc/balance/balance_bloc.dart';
 import 'features/auth/bloc/portfolio/portfolio_bloc.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/crypto_list/bloc/crypto_list_bloc.dart';
@@ -45,6 +46,12 @@ class CryptoApp extends StatelessWidget {
         BlocProvider(
           create: (context) => PortfolioBloc(
             coinsRepository: GetIt.I<AbstractCoinsRepository>(),
+            firestore: FirebaseFirestore.instance,
+            firebaseAuth: FirebaseAuth.instance,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => BalanceBloc(
             firestore: FirebaseFirestore.instance,
             firebaseAuth: FirebaseAuth.instance,
           ),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthRepository {
@@ -25,6 +26,12 @@ class AuthRepository {
         email: email,
         password: password,
       );
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user!.uid)
+          .collection('balance')
+          .doc('USD')
+          .set({'amount': 1000000.0});
       await credential.user?.sendEmailVerification();
       return credential.user;
     } on FirebaseAuthException catch (e) {
