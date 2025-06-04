@@ -173,7 +173,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                 controller: amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Сумма в USD',
+                  labelText: 'Количество',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -181,6 +181,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               Text(
                 'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
                 style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                'Итого: ${amountController.text.isEmpty ? '0' : (double.tryParse(amountController.text) ?? 0 * coinDetails.priceInUSD).toStringAsFixed(2)} \$',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               Row(
@@ -206,31 +213,52 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                         final amount = double.tryParse(amountController.text);
                         if (amount == null || amount <= 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Введите корректную сумму')),
+                            const SnackBar(content: Text('Введите корректное количество')),
                           );
                           return;
                         }
 
                         try {
                           final user = FirebaseAuth.instance.currentUser!;
-                          final portfolioItem = {
-                            'coinSymbol': coin!.symbol,
-                            'coinName': coinDetails.name,
-                            'amountUSD': amount,
-                            'priceAtPurchase': coinDetails.priceInUSD,
-                            'purchaseDate': DateTime.now(),
-                            'imageUrl': coinDetails.imageUrl,
-                          };
-
-                          await FirebaseFirestore.instance
+                          final docRef = FirebaseFirestore.instance
                               .collection('users')
                               .doc(user.uid)
                               .collection('portfolio')
-                              .add(portfolioItem);
+                              .doc(coin!.symbol);
+
+                          // Используем транзакцию для атомарного обновления
+                          await FirebaseFirestore.instance.runTransaction(
+                                (transaction) async {
+                              final doc = await transaction.get(docRef);
+
+                              if (doc.exists) {
+                                // Если документ уже существует - обновляем количество
+                                final currentAmount = doc.data()?['amount'] ?? 0;
+                                transaction.update(docRef, {
+                                  'amount': currentAmount + amount,
+                                  'lastPurchaseDate': DateTime.now(),
+                                });
+                              } else {
+                                // Если документа нет - создаем новый
+                                transaction.set(docRef, {
+                                  'coinSymbol': coin!.symbol,
+                                  'coinName': coinDetails.name,
+                                  'amount': amount,
+                                  'firstPurchaseDate': DateTime.now(),
+                                  'lastPurchaseDate': DateTime.now(),
+                                  'imageUrl': coinDetails.imageUrl,
+                                });
+                              }
+                            },
+                          );
 
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Успешно куплено ${coinDetails.name} на сумму $amount \$')),
+                            SnackBar(
+                              content: Text(
+                                'Успешно куплено $amount ${coin!.symbol}',
+                              ),
+                            ),
                           );
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -485,10 +513,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ),
     );
   }
-
-
-
-
 }
 
 
