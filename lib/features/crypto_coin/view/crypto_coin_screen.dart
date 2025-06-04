@@ -133,6 +133,122 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       });
     }
   }
+  void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
+    final TextEditingController amountController = TextEditingController();
+    final authState = context.read<AuthBloc>().state;
+
+    if (authState is! Authenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пожалуйста, войдите в систему для покупки')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Купить ${coinDetails.name}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Сумма в USD',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        minimumSize: const Size(0, 50),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Отмена'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        minimumSize: const Size(0, 50),
+                      ),
+                      onPressed: () async {
+                        final amount = double.tryParse(amountController.text);
+                        if (amount == null || amount <= 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Введите корректную сумму')),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final user = FirebaseAuth.instance.currentUser!;
+                          final portfolioItem = {
+                            'coinSymbol': coin!.symbol,
+                            'coinName': coinDetails.name,
+                            'amountUSD': amount,
+                            'priceAtPurchase': coinDetails.priceInUSD,
+                            'purchaseDate': DateTime.now(),
+                            'imageUrl': coinDetails.imageUrl,
+                          };
+
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(user.uid)
+                              .collection('portfolio')
+                              .add(portfolioItem);
+
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Успешно куплено ${coinDetails.name} на сумму $amount \$')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Ошибка: $e')),
+                          );
+                        }
+                      },
+                      child: const Text('Купить'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
   Future<void> _refreshData() async {
     if (coin != null) {
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
@@ -325,6 +441,26 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          BaseCard(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                onPressed: () => _showBuyDialog(context, coinDetails),
+                child: const Text(
+                  'Купить',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
