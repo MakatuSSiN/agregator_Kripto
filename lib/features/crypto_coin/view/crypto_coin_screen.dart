@@ -135,8 +135,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   }
   void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
     final TextEditingController amountController = TextEditingController();
+    final TextEditingController usdController = TextEditingController();
     final authState = context.read<AuthBloc>().state;
-
+    bool _isAmountFieldFocused = false;
+    bool _isUsdFieldFocused = false;
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Пожалуйста, войдите в систему для покупки')),
@@ -146,6 +148,29 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
         MaterialPageRoute(builder: (context) => const AuthScreen()),
       );
       return;
+    }
+
+    // Функция для обновления полей
+    void updateFields({bool fromAmount = true}) {
+      final price = coinDetails.priceInUSD;
+
+      if (fromAmount && _isAmountFieldFocused) {
+        final amountText = amountController.text;
+        if (amountText.isNotEmpty) {
+          final amount = double.tryParse(amountText) ?? 0;
+          usdController.text = (amount * price).toStringAsFixed(2);
+        } else {
+          usdController.clear();
+        }
+      } else if (!fromAmount && _isUsdFieldFocused) {
+        final usdText = usdController.text;
+        if (usdText.isNotEmpty) {
+          final usd = double.tryParse(usdText) ?? 0;
+          amountController.text = (usd / price).toStringAsFixed(8);
+        } else {
+          amountController.clear();
+        }
+      }
     }
 
     showModalBottomSheet(
@@ -171,23 +196,37 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               const SizedBox(height: 20),
               TextField(
                 controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Количество',
-                  border: OutlineInputBorder(),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Количество ${coin!.symbol}',
+                  border: const OutlineInputBorder(),
+                  suffixText: coin!.symbol,
                 ),
+                onChanged: (_) => updateFields(fromAmount: true),
+                onTap: () {
+                  _isAmountFieldFocused = true;
+                  _isUsdFieldFocused = false;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: usdController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Сумма в USD',
+                  border: OutlineInputBorder(),
+                  suffixText: 'USD',
+                ),
+                onChanged: (_) => updateFields(fromAmount: false),
+                onTap: () {
+                  _isAmountFieldFocused = false;
+                  _isUsdFieldFocused = true;
+                },
               ),
               const SizedBox(height: 20),
               Text(
                 'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
                 style: const TextStyle(fontSize: 16),
-              ),
-              Text(
-                'Итого: ${amountController.text.isEmpty ? '0' : (double.tryParse(amountController.text) ?? 0 * coinDetails.priceInUSD).toStringAsFixed(2)} \$',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
               ),
               const Spacer(),
               Row(
@@ -226,20 +265,17 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                               .collection('portfolio')
                               .doc(coin!.symbol);
 
-                          // Используем транзакцию для атомарного обновления
                           await FirebaseFirestore.instance.runTransaction(
                                 (transaction) async {
                               final doc = await transaction.get(docRef);
 
                               if (doc.exists) {
-                                // Если документ уже существует - обновляем количество
                                 final currentAmount = doc.data()?['amount'] ?? 0;
                                 transaction.update(docRef, {
                                   'amount': currentAmount + amount,
                                   'lastPurchaseDate': DateTime.now(),
                                 });
                               } else {
-                                // Если документа нет - создаем новый
                                 transaction.set(docRef, {
                                   'coinSymbol': coin!.symbol,
                                   'coinName': coinDetails.name,
