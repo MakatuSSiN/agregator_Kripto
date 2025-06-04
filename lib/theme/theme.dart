@@ -72,6 +72,21 @@ final darkTheme = ThemeData(
       }),
     ),
   ),
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.yellow,
+  ),
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
+      primary: Colors.yellow,
+      onPrimary: Colors.grey.shade900,
+      secondary: Colors.yellow,
+      onSecondary: Colors.grey.shade900,
+      error: Colors.yellow,
+      onError: Colors.grey.shade900,
+      surface: Colors.yellow,
+      onSurface: Colors.grey.shade900
+      ,
+    )
 );
 
 final lightTheme = ThemeData(
@@ -146,4 +161,18 @@ final lightTheme = ThemeData(
       }),
     ),
     ),
+    buttonTheme: ButtonThemeData(
+      buttonColor: Colors.grey.shade300,
+    ),
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    primary: Colors.black,
+    onPrimary: Colors.grey.shade50,
+    secondary: Colors.grey.shade700,
+    onSecondary: Colors.white,
+    error: Colors.red.shade700,
+    onError: Colors.white,
+    surface: Colors.grey.shade300,
+    onSurface: Colors.black,
+     )
   );
