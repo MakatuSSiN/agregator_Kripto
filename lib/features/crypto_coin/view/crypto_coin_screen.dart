@@ -142,73 +142,58 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       String coinSymbol,
       CryptoCoinDetail coinDetails,
       ) async {
-    try {
-      final balanceBloc = context.read<BalanceBloc>();
-      final portfolioBloc = context.read<PortfolioBloc>();
-      final user = FirebaseAuth.instance.currentUser!;
+    final balanceBloc = context.read<BalanceBloc>();
+    final portfolioBloc = context.read<PortfolioBloc>();
+    final user = FirebaseAuth.instance.currentUser!;
 
-      // 1. Проверяем баланс
-      final currentBalance = await balanceBloc.getCurrentBalance();
-      if (currentBalance < usdAmount) {
-        throw Exception('Недостаточно средств на балансе');
-      }
-
-      // 2. Обновляем баланс (без await, так как add не возвращает Future)
-      balanceBloc.add(UpdateBalance(usdAmount, true));
-
-      // Ждём завершения обновления баланса
-      await balanceBloc.stream.firstWhere((state) =>
-      state is BalanceOperationSuccess || state is BalanceError);
-
-      // Если была ошибка - выбрасываем исключение
-      if (balanceBloc.state is BalanceError) {
-        throw Exception((balanceBloc.state as BalanceError).message);
-      }
-
-      // 3. Добавляем в портфель
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final portfolioRef = FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('portfolio')
-            .doc(coinSymbol);
-
-        final doc = await transaction.get(portfolioRef);
-
-        if (doc.exists) {
-          final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
-          transaction.update(portfolioRef, {
-            'amount': currentAmount + amount,
-            'lastPurchaseDate': DateTime.now(),
-          });
-        } else {
-          transaction.set(portfolioRef, {
-            'coinSymbol': coinSymbol,
-            'coinName': coinDetails.name,
-            'amount': amount,
-            'firstPurchaseDate': DateTime.now(),
-            'lastPurchaseDate': DateTime.now(),
-            'imageUrl': coinDetails.imageUrl,
-          });
-        }
-      });
-
-      // Обновляем данные в UI
-      portfolioBloc.add(LoadPortfolio());
-      balanceBloc.add(LoadBalance());
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Успешно куплено $amount ${coinSymbol}')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: ${e.toString()}')),
-        );
-      }
+    // 1. Проверяем баланс
+    final currentBalance = await balanceBloc.getCurrentBalance();
+    if (currentBalance < usdAmount) {
+      throw Exception('Недостаточно средств на балансе');
     }
+
+    // 2. Обновляем баланс
+    balanceBloc.add(UpdateBalance(usdAmount, true));
+
+    // Ждём завершения обновления баланса
+    await balanceBloc.stream.firstWhere((state) =>
+    state is BalanceOperationSuccess || state is BalanceError);
+
+    if (balanceBloc.state is BalanceError) {
+      throw Exception((balanceBloc.state as BalanceError).message);
+    }
+
+    // 3. Добавляем в портфель
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final portfolioRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('portfolio')
+          .doc(coinSymbol);
+
+      final doc = await transaction.get(portfolioRef);
+
+      if (doc.exists) {
+        final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
+        transaction.update(portfolioRef, {
+          'amount': currentAmount + amount,
+          'lastPurchaseDate': DateTime.now(),
+        });
+      } else {
+        transaction.set(portfolioRef, {
+          'coinSymbol': coinSymbol,
+          'coinName': coinDetails.name,
+          'amount': amount,
+          'firstPurchaseDate': DateTime.now(),
+          'lastPurchaseDate': DateTime.now(),
+          'imageUrl': coinDetails.imageUrl,
+        });
+      }
+    });
+
+    // Обновляем данные в UI
+    portfolioBloc.add(LoadPortfolio());
+    balanceBloc.add(LoadBalance());
   }
   void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
     final TextEditingController amountController = TextEditingController();
@@ -216,6 +201,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     final authState = context.read<AuthBloc>().state;
     bool _isAmountFieldFocused = false;
     bool _isUsdFieldFocused = false;
+    bool _isProcessing = false;
+
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Пожалуйста, войдите в систему для покупки')),
@@ -253,7 +240,9 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => Padding(
+      builder: (context) {
+        return StatefulBuilder( // Добавляем StatefulBuilder для обновления состояния
+        builder: (context, setState) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -312,9 +301,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
-                        minimumSize: const Size(0, 50),
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: _isProcessing
+                          ? null
+                          : () => Navigator.pop(context),
                       child: const Text('Отмена'),
                     ),
                   ),
@@ -323,27 +313,38 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        minimumSize: const Size(0, 50),
                       ),
-                      onPressed: () async {
-                        final amount = double.tryParse(amountController.text);
-                        final usdAmount = double.tryParse(usdController.text);
-                        if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Введите корректное количество')),
-                          );
-                          return;
-                        }
-                        await _processPurchase(
-                          context,
-                          amount,
-                          usdAmount,
-                          coin!.symbol,
-                          coinDetails,
-                        );
+                      onPressed: _isProcessing
+                          ? null
+                          : () async {
+                        setState(() => _isProcessing = true);
+                        try {
+                          final amount = double.tryParse(amountController.text);
+                          final usdAmount = double.tryParse(usdController.text);
 
+                          if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
+                            throw Exception('Введите корректное количество');
+                          }
+
+                          await _processPurchase(
+                            context,
+                            amount,
+                            usdAmount,
+                            coin!.symbol,
+                            coinDetails,
+                          );
+                          Navigator.pop(context); // Закрываем только после успеха
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        } finally {
+                          setState(() => _isProcessing = false);
+                        }
                       },
-                      child: const Text('Купить'),
+                      child: _isProcessing
+                          ? const CircularProgressIndicator()
+                          : const Text('Купить'),
                     ),
                   ),
                 ],
@@ -351,7 +352,9 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             ],
           ),
         ),
-      ),
+          ),
+        );
+      },
     );
   }
   Future<void> _refreshData() async {
