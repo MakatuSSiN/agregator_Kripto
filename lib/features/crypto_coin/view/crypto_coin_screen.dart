@@ -35,7 +35,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   CryptoChartBloc? _chartBloc;
   late final ZoomPanBehavior _zoomPanBehavior;
   late final TrackballBehavior _trackballBehavior;
-  bool _isDataLoaded = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey();
   bool _isFavorite = false;
   StreamSubscription? _favoritesSubscription;
@@ -100,9 +99,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _coinDetailsBloc.add(StartAutoRefresh(currencyCode: coin!.name));
     _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
     _chartBloc?.add(LoadCryptoChart(coin!.symbol));
-    if (args != null && (coin == null || coin!.name != args.name)) {
+    if (coin == null || coin!.name != args.name) {
       coin = args;
-      _isDataLoaded = false;
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
       _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
     }
@@ -205,11 +203,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ) async {
     final balanceBloc = context.read<BalanceBloc>();
     final portfolioBloc = context.read<PortfolioBloc>();
-    final user = FirebaseAuth.instance.currentUser!;
 
     try {
       // 1. Уменьшаем количество криптовалюты в портфеле
-      await (portfolioBloc as PortfolioBloc).reduceCryptoAmount(coinSymbol, amount);
+      await (portfolioBloc).reduceCryptoAmount(coinSymbol, amount);
 
       // 2. Обновляем баланс (добавляем USD)
       balanceBloc.add(SellCrypto(usdAmount, false));

@@ -178,7 +178,7 @@ class _UserProfile extends StatelessWidget {
                     item.coinName,
                 style: Theme.of(context).textTheme.bodyMedium,),
                 subtitle: Text(
-                    '${item.amount.toStringAsFixed(4)}', //${item.coinSymbol}
+                    item.amount.toStringAsFixed(4), //${item.coinSymbol}
                 style: Theme.of(context).textTheme.bodyMedium,),
               );
             },
