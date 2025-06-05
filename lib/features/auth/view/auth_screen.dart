@@ -17,24 +17,31 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      appBar: AppBar(
+        title: const Text('Profile'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
       body: BlocListener<AuthBloc, AuthState>(
-    listener: (context, state) {
-    if (state is Authenticated) {
-    // Загружаем избранные при успешной аутентификации
-    context.read<FavoritesBloc>().add(LoadFavorites());
-    }
-    },
-    child: BlocBuilder<AuthBloc, AuthState>(
-    builder: (context, state) {
-    if (state is AuthLoading) {
-    return const Center(child: CircularProgressIndicator());
-    } else if (state is Authenticated) {
-    return _UserProfile(user: state.user);
-    } else {
-    return const AuthForm();}}
-    ),
-    ));
+        listener: (context, state) {
+          if (state is Authenticated) {
+            // Загружаем избранные при успешной аутентификации
+            context.read<FavoritesBloc>().add(LoadFavorites());
+          }
+          },
+        child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is Authenticated) {
+                return _UserProfile(user: state.user);
+              } else {
+                return const AuthForm();
+              }
+            }
+        ),
+      )
+    );
   }
 }
 
@@ -59,9 +66,14 @@ class _UserProfile extends StatelessWidget {
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.primary,
           appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primary,
             title: Text(user.email ?? 'Profile'),
-            bottom: const TabBar(
+            bottom: TabBar(
+              indicatorColor: Theme.of(context).colorScheme.secondary,
+              labelColor: Theme.of(context).colorScheme.secondary,
+              unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.6),
                 tabs: [
             Tab(icon: Icon(Icons.person)),
             Tab(icon: Icon(Icons.wallet)),
@@ -86,12 +98,16 @@ class _UserProfile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             radius: 50,
             backgroundImage: user.photoURL != null
                 ? NetworkImage(user.photoURL!)
                 : null,
             child: user.photoURL == null
-                ? const Icon(Icons.person, size: 50)
+                ? Icon(
+                Icons.person,
+                size: 50,
+            color: Theme.of(context).colorScheme.primary,)
                 : null,
           ),
           const SizedBox(height: 16),
@@ -117,11 +133,17 @@ class _UserProfile extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              foregroundColor: Theme.of(context).colorScheme.primary,
+            ),
             onPressed: () {
               context.read<FavoritesBloc>().add(FavoritesUpdated([]));
               context.read<AuthBloc>().add(SignOutRequested());
             },
-            child: const Text('Sign Out'),
+            child: Text('Sign Out', style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary
+            )),
           ),
         ],
       ),

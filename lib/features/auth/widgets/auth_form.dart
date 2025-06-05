@@ -80,7 +80,18 @@ class _AuthFormState extends State<AuthForm> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 18,
               ),
-              decoration: const InputDecoration(labelText: 'Email',),
+              decoration: InputDecoration(
+                labelText: 'Email',
+              labelStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary
+              ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter email';
@@ -97,7 +108,18 @@ class _AuthFormState extends State<AuthForm> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 18,
               ),
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                  labelText: 'Password',
+                labelStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                ),
+              ),
               obscureText: true,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -118,8 +140,8 @@ class _AuthFormState extends State<AuthForm> {
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).colorScheme.onSecondary,
               ),
               onPressed: state is AuthLoading ? null : _submit,
               child: state is AuthLoading
@@ -127,6 +149,9 @@ class _AuthFormState extends State<AuthForm> {
                   : Text(_isLogin ? 'Sign In' : 'Sign Up'),
             ),
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.secondary,
+              ),
               onPressed: () {
                 setState(() {
                   _isLogin = !_isLogin;
@@ -149,20 +174,25 @@ class _AuthFormState extends State<AuthForm> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
                 Icons.mark_email_read,
                 size: 64,
-
+              color: Theme.of(context).colorScheme.secondary
           ),
             const SizedBox(height: 24),
             Text(
               'Verification Email Sent',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.secondary
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'Please check your email $email and click the verification link',
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.secondary
+              ),
             ),
             const SizedBox(height: 32),
             BlocListener<AuthBloc, AuthState>(
@@ -174,6 +204,10 @@ class _AuthFormState extends State<AuthForm> {
                 }
               },
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                ),
                 onPressed: () async {
                   try {
                     await FirebaseAuth.instance.currentUser?.reload();
@@ -209,10 +243,20 @@ class _AuthFormState extends State<AuthForm> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Resend verification email'),
+                  Text(
+                    'Resend verification email',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary
+                    ),
+                  ),
                   if (!_canResendEmail) ...[
                     const SizedBox(width: 8),
-                    Text('($_resendCooldown)'),
+                    Text(
+                      '($_resendCooldown)',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary
+                      ),
+                    ),
                   ],
                 ],
               ),

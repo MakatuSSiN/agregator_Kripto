@@ -576,7 +576,9 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
           actions: [
             IconButton(
               icon: Icon(
@@ -624,9 +626,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                     const SizedBox(width: 12),
                     Text(
                       '${state.coinDetails.name}/USD',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onPrimary
                       ),
                     ),
                   ],
@@ -643,31 +646,32 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               //     Colors.blue.shade900,
               //     Colors.blue.shade700,
               //   ],
-              ),
             ),
           ),
+        ),
 
 
         //),
     body: RefreshIndicator(
-    key: _refreshIndicatorKey,
-    onRefresh: _refreshData,
-    child: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
-      bloc: _coinDetailsBloc,
-      builder: (context, state) {
+      key: _refreshIndicatorKey,
+      onRefresh: _refreshData,
+      child: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
+        bloc: _coinDetailsBloc,
+        builder: (context, state) {
           if (state is CryptoCoinDetailsLoaded) {
             return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-                children: [
-                  if (_chartBloc != null)
-                  BlocProvider.value(
-                  value: _chartBloc!,
-                  // create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
-                  //   ..add(LoadCryptoChart(coin!.symbol)),
-                  child: _buildContent(state.coinDetails),
-            )]
-    )
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                    children: [
+                      if (_chartBloc != null)
+                        BlocProvider.value(
+                          value: _chartBloc!,
+                          // create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
+                          //   ..add(LoadCryptoChart(coin!.symbol)),
+                          child: _buildContent(state.coinDetails),
+                        )
+                    ]
+                )
             );
 
           }
@@ -682,19 +686,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // SizedBox(
-          //   height: 50,
-          //   width: 50,
-          //   child: Image.network(coinDetails.imageUrl),
-          // ),
-          // const SizedBox(height: 8),
-          // Text(
-          //   coinDetails.name,
-          //   style: const TextStyle(
-          //     fontSize: 26,
-          //     fontWeight: FontWeight.w700,
-          //   ),
-          // ),
           SizedBox(
             width: 350,
             child: SegmentedButton<TimeFrame>(
