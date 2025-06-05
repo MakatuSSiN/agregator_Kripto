@@ -119,14 +119,14 @@ class _UserProfile extends StatelessWidget {
             builder: (context, state) {
               if (state is BalanceLoaded) {
                 return Text(
-                  'Баланс: ${state.amount.toStringAsFixed(2)} USD',
+                  'Balance: ${state.amount.toStringAsFixed(2)} USD',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 );
               } else if (state is BalanceError) {
-                return Text('Ошибка: ${state.message}');
+                return Text('Error: ${state.message}');
               }
               return const CircularProgressIndicator();
             },

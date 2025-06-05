@@ -150,7 +150,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     // 1. Проверяем баланс
     final currentBalance = await balanceBloc.getCurrentBalance();
     if (currentBalance < usdAmount) {
-      throw Exception('Недостаточно средств на балансе');
+      throw Exception('Insufficient funds on balance');
     }
 
     // 2. Обновляем баланс
@@ -227,7 +227,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       balanceBloc.add(LoadBalance());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Успешно продано $amount ${coin!.symbol}')),
+        SnackBar(content: Text('Successfully sold $amount ${coin!.symbol}')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -248,7 +248,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
 
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пожалуйста, войдите в систему для продажи')),
+        const SnackBar(content: Text('Please login to sell')),
       );
       Navigator.push(
         context,
@@ -395,7 +395,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                               final usdAmount = double.tryParse(usdController.text);
 
                               if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-                                throw Exception('Введите корректное количество');
+                                throw Exception('Enter correct amount');
                               }
 
                               await _processSale(
@@ -446,7 +446,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
 
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пожалуйста, войдите в систему для покупки')),
+        const SnackBar(content: Text('Please login to purchase')),
       );
       Navigator.push(
         context,
@@ -593,7 +593,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                           final usdAmount = double.tryParse(usdController.text);
 
                           if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-                            throw Exception('Введите корректное количество');
+                            throw Exception('Enter correct amount');
                           }
 
                           await _processPurchase(
@@ -604,7 +604,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                             coinDetails,
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Успешно куплено $amount ${coin!.symbol}')),
+                            SnackBar(content: Text('Successfully purchased $amount ${coin!.symbol}')),
                           );
                           Navigator.pop(context); // Закрываем только после успеха
                         } catch (e) {
@@ -831,15 +831,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.green.shade900,
                       ),
                       onPressed: () => _showBuyDialog(context, coinDetails),
-                      child: const Text(
-                        'Купить',
+                      child: Text(
+                        'Buy',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
@@ -848,15 +848,15 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: Colors.red.shade900,
                       ),
                       onPressed: () => _showSellDialog(context, coinDetails),
-                      child: const Text(
-                        'Продать',
+                      child: Text(
+                        'Sell',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
@@ -894,16 +894,16 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        const Text('Быстрый выбор:', style: TextStyle(fontSize: 16)),
+        const Text('Quick selection:', style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildQuickButton('5%', () => _setQuickAmount(0.05, isBuy, coinDetails, amountController, usdController)),
             _buildQuickButton('10%', () => _setQuickAmount(0.1, isBuy, coinDetails, amountController, usdController)),
-            _buildQuickButton('20%', () => _setQuickAmount(0.2, isBuy, coinDetails, amountController, usdController)),
-            _buildQuickButton('Все', () => _setAllAmount(isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('25%', () => _setQuickAmount(0.25, isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('50%', () => _setQuickAmount(0.5, isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('All', () => _setAllAmount(isBuy, coinDetails, amountController, usdController)),
           ],
         ),
       ],
@@ -945,13 +945,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           usdController.text = (item.amount * coinDetails.priceInUSD).toStringAsFixed(2);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('У вас нет ${coin!.symbol} в портфеле')),
+            SnackBar(content: Text('You do not have a ${coin!.symbol} in portfolio')),
           );
         }
       } else {
         portfolioBloc.add(LoadPortfolio());
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Загружаем данные портфеля...')),
+          const SnackBar(content: Text('Loading data portfolio...')),
         );
       }
     } else {
@@ -996,14 +996,14 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
         }
         else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('У вас нет ${coin!.symbol} в портфеле')),
+            SnackBar(content: Text('You do not have a ${coin!.symbol} in portfolio')),
           );
         }
       } else {
         // Если портфель еще не загружен, загружаем его
         portfolioBloc.add(LoadPortfolio());
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Загружаем данные портфеля...')),
+          const SnackBar(content: Text('Loading data portfolio...')),
         );
       }
       }
