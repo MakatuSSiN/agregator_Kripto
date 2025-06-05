@@ -59,6 +59,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: _currentPageIndex == 0 ? _buildAppBar(context) : null,
       body: IndexedStack(
         index: _currentPageIndex,
@@ -67,7 +68,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
       bottomNavigationBar: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) { // Получаем authState здесь
           return NavigationBar(
-            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             selectedIndex: _currentPageIndex,
             onDestinationSelected: (index) {
               if (index == 1 && authState is! Authenticated) {
@@ -93,6 +94,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.primary,
       title: Text(widget.title),
       actions: [
         Consumer<ThemeProvider>(
@@ -104,6 +106,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
                   themeProvider.themeMode == ThemeMode.dark
                       ? Icons.nightlight_round
                       : Icons.wb_sunny,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 const SizedBox(width: 8),
                 Switch(
@@ -126,14 +129,15 @@ class CryptoListScreenState extends State<CryptoListScreen> {
           child: TextField(
             controller: _searchController,
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color, // Цвет текста оси X
+              color: Theme.of(context).colorScheme.onPrimary, // Цвет текста оси X
             ),
             decoration: InputDecoration(
               hintText: 'Search cryptocurrencies...',
               hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                fontSize: 18
               ),
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onPrimary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
