@@ -176,10 +176,6 @@ class _UserProfile extends StatelessWidget {
                 ),
                 title: Text(item.coinName),
                 subtitle: Text('${item.amount.toStringAsFixed(4)} ${item.coinSymbol}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _removeFromPortfolio(context, item.coinSymbol),
-                ),
               );
             },
           );
@@ -187,27 +183,5 @@ class _UserProfile extends StatelessWidget {
         return const SizedBox();
       },
     );
-  }
-
-  Future<void> _removeFromPortfolio(BuildContext context, String coinSymbol) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('portfolio')
-          .doc(coinSymbol)
-          .delete();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Removed $coinSymbol from portfolio')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
   }
 }
