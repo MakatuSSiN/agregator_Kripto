@@ -22,6 +22,22 @@ class _AuthFormState extends State<AuthForm> {
   Timer? _resendTimer;
 
   @override
+  void initState() {
+    super.initState();
+    // Проверяем, нужно ли запускать таймер сразу (если мы на экране подтверждения)
+    if (context.read<AuthBloc>().state is EmailVerificationSent) {
+      _startResendTimer();
+    }
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentState = context.read<AuthBloc>().state;
+    if (currentState is EmailVerificationSent && _resendTimer == null) {
+      _startResendTimer();
+    }
+  }
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -29,18 +45,23 @@ class _AuthFormState extends State<AuthForm> {
     super.dispose();
   }
   void _startResendTimer() {
+    // Сбрасываем предыдущий таймер, если он был
+    _resendTimer?.cancel();
+
     setState(() {
       _canResendEmail = false;
       _resendCooldown = 120;
     });
 
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+
       setState(() {
         _resendCooldown--;
       });
 
       if (_resendCooldown <= 0) {
-        _resendTimer?.cancel();
+        timer.cancel();
         setState(() {
           _canResendEmail = true;
         });
@@ -56,6 +77,9 @@ class _AuthFormState extends State<AuthForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
+        }
+        if (state is EmailVerificationSent) {
+          _startResendTimer();
         }
       },
       builder: (context, state) {

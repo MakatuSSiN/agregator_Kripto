@@ -824,5 +824,3 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     );
   }
 }
-
-
