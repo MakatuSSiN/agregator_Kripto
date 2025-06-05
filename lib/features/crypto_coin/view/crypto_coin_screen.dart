@@ -288,13 +288,14 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.7,
+              //color: Theme.of(context).colorScheme.surface,
+              height: MediaQuery.of(context).size.height * 0.4,
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Продать ${coinDetails.name}',
+                    'Sell ${coinDetails.name}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -302,12 +303,23 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
                     controller: amountController,
                     keyboardType: TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: 'Количество ${coin!.symbol}',
+                      labelText: 'Amount ${coin!.symbol}',
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
                       border: const OutlineInputBorder(),
                       suffixText: coin!.symbol,
+                      suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                     onChanged: (_) => updateFields(fromAmount: true),
                     onTap: () {
@@ -317,12 +329,23 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
                     controller: usdController,
                     keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Сумма в USD',
+                    decoration: InputDecoration(
+                      labelText: 'Total USD',
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
                       border: OutlineInputBorder(),
                       suffixText: 'USD',
+                      suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                     onChanged: (_) => updateFields(fromAmount: false),
                     onTap: () {
@@ -330,10 +353,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       _isUsdFieldFocused = true;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 14),
                   Text(
-                    'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
-                    style: const TextStyle(fontSize: 16),
+                    'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                    style: const TextStyle(fontSize: 18),
                   ),
                   const Spacer(),
                   Row(
@@ -341,19 +364,25 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: Colors.grey.shade600,
                           ),
                           onPressed: _isProcessing
                               ? null
                               : () => Navigator.pop(context),
-                          child: const Text('Отмена'),
+                          child: Text(
+                            'Cancel',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.primary
+                            )
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.red.shade900,
                           ),
                           onPressed: _isProcessing
                               ? null
@@ -385,7 +414,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                           },
                           child: _isProcessing
                               ? const CircularProgressIndicator()
-                              : const Text('Продать'),
+                              : Text(
+                              'Sell',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontSize: 18,
+                                  color: Theme.of(context).colorScheme.primary
+                              )
+                          ),
                         ),
                       ),
                     ],
@@ -451,13 +486,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
+          height: MediaQuery.of(context).size.height * 0.4,
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Купить ${coinDetails.name}',
+                'Buy ${coinDetails.name}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -465,12 +500,23 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               ),
               const SizedBox(height: 20),
               TextField(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
                 controller: amountController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: 'Количество ${coin!.symbol}',
+                  labelText: 'Amount ${coin!.symbol}',
+                  labelStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
                   border: const OutlineInputBorder(),
                   suffixText: coin!.symbol,
+                  suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                 ),
                 onChanged: (_) => updateFields(fromAmount: true),
                 onTap: () {
@@ -480,12 +526,23 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
                 controller: usdController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Сумма в USD',
+                decoration: InputDecoration(
+                  labelText: 'Total USD',
+                  labelStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
                   border: OutlineInputBorder(),
                   suffixText: 'USD',
+                  suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                 ),
                 onChanged: (_) => updateFields(fromAmount: false),
                 onTap: () {
@@ -493,10 +550,10 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   _isUsdFieldFocused = true;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
               Text(
-                'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
-                style: const TextStyle(fontSize: 16),
+                'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                style: const TextStyle(fontSize: 18),
               ),
               const Spacer(),
               Row(
@@ -504,19 +561,25 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: Colors.grey.shade600,
                       ),
                       onPressed: _isProcessing
                           ? null
                           : () => Navigator.pop(context),
-                      child: const Text('Отмена'),
+                      child: Text(
+                          'Cancel',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.primary
+                          )
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.green.shade900,
                       ),
                       onPressed: _isProcessing
                           ? null
@@ -552,7 +615,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       },
                       child: _isProcessing
                           ? const CircularProgressIndicator()
-                          : const Text('Купить'),
+                          : Text(
+                          'Buy',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.primary
+                          )
+                      ),
                     ),
                   ),
                 ],

@@ -19,7 +19,7 @@ class AuthScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile', style: Theme.of(context).textTheme.bodyMedium,),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: BlocListener<AuthBloc, AuthState>(
@@ -69,7 +69,7 @@ class _UserProfile extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primary,
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            title: Text(user.email ?? 'Profile'),
+            title: Text(user.email ?? 'Profile', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 22),),
             bottom: TabBar(
               indicatorColor: Theme.of(context).colorScheme.secondary,
               labelColor: Theme.of(context).colorScheme.secondary,
@@ -174,8 +174,12 @@ class _UserProfile extends StatelessWidget {
                   height: 40,
                   child: Image.network(item.imageUrl),
                 ),
-                title: Text(item.coinName),
-                subtitle: Text('${item.amount.toStringAsFixed(4)} ${item.coinSymbol}'),
+                title: Text(
+                    item.coinName,
+                style: Theme.of(context).textTheme.bodyMedium,),
+                subtitle: Text(
+                    '${item.amount.toStringAsFixed(4)}', //${item.coinSymbol}
+                style: Theme.of(context).textTheme.bodyMedium,),
               );
             },
           );
