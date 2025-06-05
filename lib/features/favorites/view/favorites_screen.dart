@@ -27,9 +27,6 @@ class FavoritesScreen extends StatelessWidget {
     },
     child: BlocBuilder<AuthBloc, AuthState>(
     builder: (context, authState) {
-    if (authState is! Authenticated) {
-    return _buildUnauthenticatedView(context);
-    }
 
     return BlocBuilder<FavoritesBloc, FavoritesState>(
     builder: (context, state) {
@@ -53,23 +50,6 @@ class FavoritesScreen extends StatelessWidget {
     ));
   }
 
-  Widget _buildUnauthenticatedView(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('Please sign in to view favorites'),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed('/profile');
-            },
-            child: const Text('Sign In'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildFavoritesList(BuildContext context, List<CryptoCoin> favorites) {
     if (favorites.isEmpty) {

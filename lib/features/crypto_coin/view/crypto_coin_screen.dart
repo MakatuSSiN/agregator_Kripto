@@ -708,15 +708,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             },
           ),
           centerTitle: true,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              // gradient: LinearGradient(
-              //   colors: [
-              //     Colors.blue.shade900,
-              //     Colors.blue.shade700,
-              //   ],
-            ),
-          ),
         ),
 
 
@@ -961,8 +952,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     }
   }
 
-  void _setQuickAmount(double percent, bool isBuy, CryptoCoinDetail coinDetails,
-      TextEditingController amountController, TextEditingController usdController) {
+  void _setQuickAmount(
+      double percent,
+      bool isBuy,
+      CryptoCoinDetail coinDetails,
+      TextEditingController amountController,
+      TextEditingController usdController) {
     if (isBuy) {
       // Для покупки - процент от текущего баланса USD
       final balanceBloc = context.read<BalanceBloc>();
@@ -993,16 +988,24 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
         }
         else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('You do not have a ${coin!.symbol} in portfolio')),
+            SnackBar(
+                content: Text(
+                    'You do not have a ${coin!.symbol} in portfolio'
+                )
+            ),
           );
         }
       } else {
         // Если портфель еще не загружен, загружаем его
         portfolioBloc.add(LoadPortfolio());
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Loading data portfolio...')),
+          const SnackBar(
+              content: Text(
+                  'Loading data portfolio...'
+              )
+          ),
         );
       }
-      }
+    }
   }
 }

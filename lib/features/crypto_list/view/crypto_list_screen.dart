@@ -51,11 +51,13 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     _searchController.dispose();
     super.dispose();
   }
+
   void setPageIndex(int index) {
     setState(() {
       _currentPageIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,9 +84,18 @@ class CryptoListScreenState extends State<CryptoListScreen> {
               });
             },
             destinations: const [
-              NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-              NavigationDestination(icon: Icon(Icons.star), label: 'Favorites'),
-              NavigationDestination(icon: Icon(Icons.person), label: 'Profile',),
+              NavigationDestination(
+                  icon: Icon(Icons.home),
+                  label: 'Home'
+              ),
+              NavigationDestination(
+                  icon: Icon(Icons.star),
+                  label: 'Favorites'
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
             ],
           );
         },
