@@ -14,6 +14,7 @@ import 'package:agregator_kripto/features/crypto_coin/widgets/crypto_chart.dart'
 import 'package:get_it/get_it.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:async';
+import '../../../repositories/crypto_coins/models/portfolio_item.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/balance/balance_bloc.dart';
 import '../../auth/bloc/portfolio/portfolio_bloc.dart';
@@ -237,6 +238,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
 
 // Добавим метод для показа диалога продажи
   void _showSellDialog(BuildContext context, CryptoCoinDetail coinDetails) {
+    context.read<PortfolioBloc>().add(LoadPortfolio());
     final TextEditingController amountController = TextEditingController();
     final TextEditingController usdController = TextEditingController();
     final authState = context.read<AuthBloc>().state;
@@ -330,6 +332,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       _isUsdFieldFocused = true;
                     },
                   ),
+                  _buildQuickAmountButtons(false, coinDetails, amountController, usdController),
                   const SizedBox(height: 20),
                   Text(
                     'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
@@ -493,6 +496,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   _isUsdFieldFocused = true;
                 },
               ),
+              _buildQuickAmountButtons(true, coinDetails, amountController, usdController),
               const SizedBox(height: 20),
               Text(
                 'Текущая цена: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
@@ -813,5 +817,127 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
         ],
       ),
     );
+  }
+  Widget _buildQuickAmountButtons(bool isBuy, CryptoCoinDetail coinDetails,
+      TextEditingController amountController, TextEditingController usdController) {
+    return BlocBuilder<PortfolioBloc, PortfolioState>(
+        builder: (context, portfolioState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        const Text('Быстрый выбор:', style: TextStyle(fontSize: 16)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildQuickButton('5%', () => _setQuickAmount(0.05, isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('10%', () => _setQuickAmount(0.1, isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('20%', () => _setQuickAmount(0.2, isBuy, coinDetails, amountController, usdController)),
+            _buildQuickButton('Все', () => _setAllAmount(isBuy, coinDetails, amountController, usdController)),
+          ],
+        ),
+      ],
+    );
+        },
+    );
+  }
+  Widget _buildQuickButton(String label, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        backgroundColor: Colors.blueGrey[100],
+        foregroundColor: Colors.black87,
+      ),
+      onPressed: onPressed,
+      child: Text(label),
+    );
+  }
+
+  Future<void> _setAllAmount(bool isBuy, CryptoCoinDetail coinDetails,
+      TextEditingController amountController, TextEditingController usdController) async {
+    if (!isBuy) {
+      // Для продажи - получаем текущий баланс монеты
+      final portfolioBloc = context.read<PortfolioBloc>();
+      if (portfolioBloc.state is PortfolioLoaded) {
+        final portfolioState = portfolioBloc.state as PortfolioLoaded;
+        final item = portfolioState.portfolioItems.firstWhere(
+              (item) => item.coinSymbol == coin!.symbol,
+          orElse: () => PortfolioItem(
+            coinSymbol: '',
+            coinName: '',
+            amount: 0,
+            imageUrl: '',
+          ),
+        );
+
+        if (item.coinSymbol.isNotEmpty) {
+          amountController.text = item.amount.toStringAsFixed(8);
+          usdController.text = (item.amount * coinDetails.priceInUSD).toStringAsFixed(2);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('У вас нет ${coin!.symbol} в портфеле')),
+          );
+        }
+      } else {
+        portfolioBloc.add(LoadPortfolio());
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Загружаем данные портфеля...')),
+        );
+      }
+    } else {
+      // Для покупки - максимум по текущему балансу USD
+      final balanceBloc = context.read<BalanceBloc>();
+      final balance = await balanceBloc.getCurrentBalance();
+      final maxAmount = balance / coinDetails.priceInUSD;
+      amountController.text = maxAmount.toStringAsFixed(8);
+      usdController.text = balance.toStringAsFixed(2);
+    }
+  }
+
+  void _setQuickAmount(double percent, bool isBuy, CryptoCoinDetail coinDetails,
+      TextEditingController amountController, TextEditingController usdController) {
+    if (isBuy) {
+      // Для покупки - процент от текущего баланса USD
+      final balanceBloc = context.read<BalanceBloc>();
+      balanceBloc.getCurrentBalance().then((balance) {
+        final amount = (balance * percent) / coinDetails.priceInUSD;
+        amountController.text = amount.toStringAsFixed(8);
+        usdController.text = (balance * percent).toStringAsFixed(2);
+      });
+    } else {
+      // Для продажи - процент от текущего количества монет
+      final portfolioBloc = context.read<PortfolioBloc>();
+      if (portfolioBloc.state is PortfolioLoaded) {
+        final portfolioState = portfolioBloc.state as PortfolioLoaded;
+        final item = portfolioState.portfolioItems.firstWhere(
+              (item) => item.coinSymbol == coin!.symbol,
+          orElse: () => PortfolioItem(
+            coinSymbol: '',
+            coinName: '',
+            amount: 0,
+            imageUrl: '',
+          ),
+        );
+
+        if (item.coinSymbol.isNotEmpty) {
+          final amount = item.amount * percent;
+          amountController.text = amount.toStringAsFixed(8);
+          usdController.text = (amount * coinDetails.priceInUSD).toStringAsFixed(2);
+        }
+        else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('У вас нет ${coin!.symbol} в портфеле')),
+          );
+        }
+      } else {
+        // Если портфель еще не загружен, загружаем его
+        portfolioBloc.add(LoadPortfolio());
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Загружаем данные портфеля...')),
+        );
+      }
+      }
   }
 }
