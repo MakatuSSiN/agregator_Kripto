@@ -224,7 +224,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       balanceBloc.add(LoadBalance());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Successfully sold $amount ${coin!.symbol}')),
+        SnackBar(
+            content: Text(
+              'Successfully sold $amount ${coin!.symbol}',
+
+            )
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
