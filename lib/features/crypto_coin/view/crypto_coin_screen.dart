@@ -325,7 +325,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       _isUsdFieldFocused = false;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   TextField(
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
                     controller: usdController,
@@ -351,13 +351,14 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       _isUsdFieldFocused = true;
                     },
                   ),
+                  const SizedBox(height: 10),
                   _buildQuickAmountButtons(false, coinDetails, amountController, usdController),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   Text(
                     'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
                     style: const TextStyle(fontSize: 18),
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -549,8 +550,9 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                   _isUsdFieldFocused = true;
                 },
               ),
+              const SizedBox(height: 10),
               _buildQuickAmountButtons(true, coinDetails, amountController, usdController),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
               Text(
                 'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
                 style: const TextStyle(fontSize: 18),
@@ -874,6 +876,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       ),
     );
   }
+
   Widget _buildQuickAmountButtons(bool isBuy, CryptoCoinDetail coinDetails,
       TextEditingController amountController, TextEditingController usdController) {
     return BlocBuilder<PortfolioBloc, PortfolioState>(
@@ -881,9 +884,8 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         const Text('Quick selection:', style: TextStyle(fontSize: 16)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -899,12 +901,13 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
         },
     );
   }
+
   Widget _buildQuickButton(String label, VoidCallback onPressed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        backgroundColor: Colors.blueGrey[100],
-        foregroundColor: Colors.black87,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
       ),
       onPressed: onPressed,
       child: Text(label),

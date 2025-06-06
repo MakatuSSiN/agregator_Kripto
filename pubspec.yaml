@@ -32,9 +32,9 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0
 flutter_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
-  image_path: "assets/logo.jpeg"
+  image_path: "assets/logoOMGEX.png"
 flutter:
 
   uses-material-design: true

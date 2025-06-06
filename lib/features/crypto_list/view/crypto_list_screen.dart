@@ -106,7 +106,20 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      title: Text(widget.title),
+      title: Text(
+        widget.title,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontSize: 26,
+        ),
+      ),
+      leading: SizedBox(
+        width: 60,
+        height: 60,
+        child: Image.asset(
+            "assets/logoOMGEX.png",
+          fit: BoxFit.cover,
+        ),
+      ),
       actions: [
         Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {

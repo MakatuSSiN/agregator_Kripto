@@ -5,7 +5,7 @@ import '../features/auth/view/auth_screen.dart';
 import '../features/favorites/view/favorites_screen.dart';
 
 final routes = {
-  "/": (context) => const CryptoListScreen(title: "CRYPTO ROCKET"),
+  "/": (context) => const CryptoListScreen(title: "OMGEx"),
   "/coin": (context) => const CryptoCoinScreen(),
   "/profile": (context) => const AuthScreen(),
   "/favorites": (context) => const FavoritesScreen(),
