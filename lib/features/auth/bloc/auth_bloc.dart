@@ -1,4 +1,4 @@
-// ignore: depend_on_referenced_packages
+//ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +12,8 @@ import '../../favorites/bloc/favorites_bloc.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
+/// BLoC для управления аутентификацией пользователя
+/// Обрабатывает вход, регистрацию, выход, проверку email и другие связанные операции
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
 
@@ -24,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoadFavoritesRequested>(_loadFavorites);
   }
 
+  /// Проверка текущего состояния аутентификации
   Future<void> _authCheck(AuthCheckRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -44,6 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Загрузка избранного для аутентифицированного пользователя
   Future<void> _loadFavorites(LoadFavoritesRequested event, Emitter<AuthState> emit) async {
     try {
       if (state is Authenticated) {
@@ -59,6 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Вход с сохраненными учетными данными
   Future<void> signInWithStoredCredentials({
     required String email,
     required String password,
@@ -66,6 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     add(SignInRequested(email, password));
   }
 
+  /// Обработка входа пользователя
   Future<void> _signIn(SignInRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -86,6 +92,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Обработка регистрации пользователя
   Future<void> _signUp(SignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -98,6 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Обработка выхода пользователя
   Future<void> _signOut(SignOutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {

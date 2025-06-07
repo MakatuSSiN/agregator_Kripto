@@ -10,6 +10,8 @@ import '../../../../repositories/crypto_coins/models/portfolio_item.dart';
 part 'portfolio_event.dart';
 part 'portfolio_state.dart';
 
+/// BLoC для управления портфелем криптовалют пользователя
+/// Обрабатывает загрузку, обновление и изменение количества криптовалют в портфеле
 class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   final AbstractCoinsRepository coinsRepository;
   final FirebaseFirestore firestore;
@@ -37,7 +39,9 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
 
     emit(PortfolioLoading());
 
+    // Отменяем предыдущую подписку, если она была
     _portfolioSubscription?.cancel();
+    // Создаем подписку на коллекцию портфеля пользователя
     _portfolioSubscription = firestore
         .collection('users')
         .doc(user.uid)
@@ -53,6 +57,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       Emitter<PortfolioState> emit,
       ) {
     try {
+      // Преобразуем документы Firestore в список PortfolioItem
       final portfolioItems = event.docs
           .map((doc) => PortfolioItem.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
@@ -62,6 +67,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     }
   }
 
+  // Уменьшение количества криптовалюты в портфеле (при продаже)
   Future<void> reduceCryptoAmount(String coinSymbol, double amount) async {
     final user = firebaseAuth.currentUser;
     if (user == null) return;
@@ -73,6 +79,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
           .collection('portfolio')
           .doc(coinSymbol);
 
+      // Получаем текущее количество монет
       final doc = await transaction.get(portfolioRef);
       if (!doc.exists) throw Exception('Coin not found in portfolio');
 
@@ -85,6 +92,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
         // Если продали все монеты, удаляем документ
         transaction.delete(portfolioRef);
       } else {
+        // Иначе обновляем количество и дату последней операции
         transaction.update(portfolioRef, {
           'amount': newAmount,
           'lastPurchaseDate': DateTime.now(),

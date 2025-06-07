@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 part 'balance_event.dart';
 part 'balance_state.dart';
 
+/// BLoC для управления балансом пользователя
+/// Обрабатывает операции с балансом: загрузку, обновление, продажу криптовалюты
 class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
   final FirebaseFirestore firestore;
   final FirebaseAuth firebaseAuth;
@@ -22,6 +24,8 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
     on<SellCrypto>(_sellCrypto);
     on<SubscribeToBalance>(_subscribeToBalance);
   }
+
+  /// Обработка продажи криптовалюты (увеличение баланса)
   Future<void> _sellCrypto(
       SellCrypto event,
       Emitter<BalanceState> emit,
@@ -36,6 +40,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
           .collection('balance')
           .doc('USD');
 
+      // Транзакция для атомарного обновления баланса
       await firestore.runTransaction((transaction) async {
         final doc = await transaction.get(balanceRef);
         final currentBalance = (doc.data()?['amount'] ?? 0).toDouble();
@@ -47,6 +52,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
         return newBalance;
       });
 
+      // После успешной транзакции запрашиваем актуальный баланс
       final doc = await balanceRef.get();
       emit(BalanceOperationSuccess(doc.data()!['amount']));
     } catch (e) {
@@ -54,6 +60,8 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
       rethrow;
     }
   }
+
+  /// Подписка на изменения баланса в реальном времени
   Future<void> _subscribeToBalance(
       SubscribeToBalance event,
       Emitter<BalanceState> emit,
@@ -74,6 +82,8 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
       }
     });
   }
+
+  /// Загрузка текущего баланса пользователя
   Future<void> _loadBalance(
       LoadBalance event,
       Emitter<BalanceState> emit,
@@ -98,6 +108,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
     }
   }
 
+  /// Обновление баланса (пополнение/списание)
   Future<void> _updateBalance(
       UpdateBalance event,
       Emitter<BalanceState> emit,
@@ -116,6 +127,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
         final doc = await transaction.get(balanceRef);
         final currentBalance = (doc.data()?['amount'] ?? 0).toDouble();
 
+        // Вычисляем новый баланс в зависимости от типа операции
         final newBalance = event.isSpending
             ? currentBalance - event.amount
             : currentBalance + event.amount;
@@ -135,6 +147,8 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
       rethrow;
     }
   }
+
+  /// Получение текущего баланса
   Future<double> getCurrentBalance() async {
     final user = firebaseAuth.currentUser;
     if (user == null) throw Exception('User not authenticated');
