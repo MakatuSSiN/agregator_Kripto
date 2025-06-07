@@ -68,12 +68,17 @@ class CryptoChart extends StatelessWidget {
         ],
         primaryXAxis: DateTimeAxis(
           dateFormat: dateFormat,
-          majorGridLines: const MajorGridLines(
+          majorGridLines: MajorGridLines(
               width: 0.1,
-            color: Colors.grey
+            color: Theme.of(context).colorScheme.primary
           ),
           labelStyle: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color, // Цвет текста оси X
+          ),
+          interactiveTooltip: InteractiveTooltip(
+              enable: true,
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+              color: Theme.of(context).colorScheme.primary
           ),
         ),
         primaryYAxis: NumericAxis(
@@ -84,9 +89,9 @@ class CryptoChart extends StatelessWidget {
           labelStyle: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
-          majorGridLines: const MajorGridLines(
+          majorGridLines: MajorGridLines(
               width: 0.1,
-              color: Colors.grey
+              color: Theme.of(context).colorScheme.primary
           ),
             labelPosition: ChartDataLabelPosition.inside,
             opposedPosition: true,
@@ -94,6 +99,11 @@ class CryptoChart extends StatelessWidget {
             edgeLabelPlacement: EdgeLabelPlacement.hide,
           rangePadding: ChartRangePadding.additional,
           //interval: _calculateYInterval(chartData),
+          interactiveTooltip: InteractiveTooltip(
+              enable: true,
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+            color: Theme.of(context).colorScheme.primary
+          ),
 
 
         ),

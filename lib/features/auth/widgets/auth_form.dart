@@ -97,8 +97,18 @@ class _AuthFormState extends State<AuthForm> {
       child: Form(
         key: _formKey,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          //mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 80),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: Image.asset(
+                "assets/logoOMGEX.png",
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 30),
             TextFormField(
               controller: _emailController,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(

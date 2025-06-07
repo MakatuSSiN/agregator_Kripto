@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 final darkTheme = ThemeData(
   colorScheme: _darkColorScheme,
   textTheme: TextTheme(
-    //displayLarge: TextStyle(color: _darkColorScheme.onBackground),
     bodyMedium: TextStyle(
       color: _darkColorScheme.onPrimary,
       fontWeight: FontWeight.w700,
@@ -20,20 +19,34 @@ final darkTheme = ThemeData(
     indicatorColor: _darkColorScheme.secondary,
     labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
           (states) => TextStyle(
-        color: states.contains(WidgetState.selected)
-            ? _darkColorScheme.secondary
-            : _darkColorScheme.onSurface,
+              color: states.contains(WidgetState.selected)
+                  ? _darkColorScheme.secondary
+                  : _darkColorScheme.onSurface,
               fontSize: 14
-      ),
+          ),
     ),
   ),
-  cardTheme: CardTheme(color: Colors.black,)
+  cardTheme: CardTheme(
+    color: Colors.black
+  ),
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: _darkColorScheme.secondary,
+    contentTextStyle: TextStyle(
+      color: _darkColorScheme.onSecondary,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+    ),
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+
 );
 
 final lightTheme = ThemeData(
   colorScheme: _lightColorScheme,
   textTheme: TextTheme(
-    //displayLarge: TextStyle(color: _darkColorScheme.onBackground),
     bodyMedium: TextStyle(
       color: _lightColorScheme.onPrimary,
       fontWeight: FontWeight.w700,
@@ -50,14 +63,28 @@ final lightTheme = ThemeData(
     indicatorColor: _lightColorScheme.secondary,
     labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
           (states) => TextStyle(
-        color: states.contains(WidgetState.selected)
-            ? _lightColorScheme.onPrimary
-            : _lightColorScheme.onSurface,
-            fontSize: 14
-      ),
+              color: states.contains(WidgetState.selected)
+                  ? _lightColorScheme.onPrimary
+                  : _lightColorScheme.onSurface,
+              fontSize: 14
+          ),
     ),
   ),
-  cardTheme: CardTheme(color: Colors.grey.shade300,)
+  cardTheme: CardTheme(
+    color: Colors.grey.shade300
+  ),
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: _lightColorScheme.secondary,
+    contentTextStyle: TextStyle(
+      color: _lightColorScheme.onSecondary,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+    ),
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
 
 );
 
