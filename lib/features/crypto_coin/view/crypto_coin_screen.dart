@@ -234,18 +234,14 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   }
 
 // Добавим метод для показа диалога продажи
-  void _showSellDialog(BuildContext context, CryptoCoinDetail coinDetails) {
-    context.read<PortfolioBloc>().add(LoadPortfolio());
+  void _showTradeDialog(BuildContext context, CryptoCoinDetail coinDetails, bool isBuy) {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController usdController = TextEditingController();
     final authState = context.read<AuthBloc>().state;
-    bool _isAmountFieldFocused = false;
-    bool _isUsdFieldFocused = false;
-    bool _isProcessing = false;
 
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login to sell')),
+        SnackBar(content: Text('Please login to ${isBuy ? 'purchase' : 'sell'}')),
       );
       Navigator.push(
         context,
@@ -254,384 +250,207 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
       return;
     }
 
-    // Функция для обновления полей
-    void updateFields({bool fromAmount = true}) {
-      final price = coinDetails.priceInUSD;
-
-      if (fromAmount && _isAmountFieldFocused) {
-        final amountText = amountController.text;
-        if (amountText.isNotEmpty) {
-          final amount = double.tryParse(amountText) ?? 0;
-          usdController.text = (amount * price).toStringAsFixed(2);
-        } else {
-          usdController.clear();
-        }
-      } else if (!fromAmount && _isUsdFieldFocused) {
-        final usdText = usdController.text;
-        if (usdText.isNotEmpty) {
-          final usd = double.tryParse(usdText) ?? 0;
-          amountController.text = (usd / price).toStringAsFixed(8);
-        } else {
-          amountController.clear();
-        }
-      }
-    }
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
+        bool isProcessing = false;
+
         return StatefulBuilder(
-          builder: (context, setState) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.5,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sell ${coinDetails.name}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+          builder: (context, setModalState) {
+            // Функция для обновления полей
+            void updateFields(String value, bool isAmountField) {
+              final price = coinDetails.priceInUSD;
+              if (value.isEmpty) {
+                if (isAmountField) {
+                  usdController.text = '';
+                } else {
+                  amountController.text = '';
+                }
+                return;
+              }
+              final parsedValue = double.tryParse(value) ?? 0;
+
+              if (isAmountField) {
+                // Обновляем USD на основе Amount
+                usdController.text = (parsedValue * price).toStringAsFixed(2);
+              } else {
+                // Обновляем Amount на основе USD
+                amountController.text = (parsedValue / price).toStringAsFixed(8);
+              }
+            }
+
+            // Функция для обработки операции
+            Future<void> processTrade() async {
+              setModalState(() => isProcessing = true);
+              try {
+                final amount = double.tryParse(amountController.text);
+                final usdAmount = double.tryParse(usdController.text);
+
+                if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
+                  throw Exception('Enter correct amount');
+                }
+
+                if (isBuy) {
+                  await _processPurchase(
+                    context,
+                    amount,
+                    usdAmount,
+                    coin!.symbol,
+                    coinDetails,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Successfully purchased $amount ${coin!.symbol}')),
+                  );
+                } else {
+                  await _processSale(
+                    context,
+                    amount,
+                    usdAmount,
+                    coin!.symbol,
+                    coinDetails,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Successfully sold $amount ${coin!.symbol}')),
+                  );
+                }
+                if (mounted) Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+                if (isBuy && mounted) Navigator.pop(context);
+              } finally {
+                if (mounted) setModalState(() => isProcessing = false);
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.516,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${isBuy ? 'Buy' : 'Sell'} ${coinDetails.name}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
-                    controller: amountController,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Amount ${coin!.symbol}',
-                      labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      ),
-                      border: const OutlineInputBorder(),
-                      suffixText: coin!.symbol,
-                      suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
-                    ),
-                    onChanged: (_) => updateFields(fromAmount: true),
-                    onTap: () {
-                      _isAmountFieldFocused = true;
-                      _isUsdFieldFocused = false;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
-                    controller: usdController,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Total USD',
-                      labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      ),
-                      border: OutlineInputBorder(),
-                      suffixText: 'USD',
-                      suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
-                    ),
-                    onChanged: (_) => updateFields(fromAmount: false),
-                    onTap: () {
-                      _isAmountFieldFocused = false;
-                      _isUsdFieldFocused = true;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildQuickAmountButtons(false, coinDetails, amountController, usdController),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey.shade600,
-                          ),
-                          onPressed: _isProcessing
-                              ? null
-                              : () => Navigator.pop(context),
-                          child: Text(
-                            'Cancel',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontSize: 18,
-                                color: Theme.of(context).colorScheme.primary
-                            )
-                          ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
+                      controller: amountController,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: 'Amount ${coin!.symbol}',
+                        labelStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade900,
-                          ),
-                          onPressed: _isProcessing
-                              ? null
-                              : () async {
-                            setState(() => _isProcessing = true);
-                            try {
-                              final amount = double.tryParse(amountController.text);
-                              final usdAmount = double.tryParse(usdController.text);
-
-                              if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-                                throw Exception('Enter correct amount');
-                              }
-
-                              await _processSale(
-                                context,
-                                amount,
-                                usdAmount,
-                                coin!.symbol,
-                                coinDetails,
-                              );
-                              Navigator.pop(context);
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            } finally {
-                              setState(() => _isProcessing = false);
-                            }
-                          },
-                          child: _isProcessing
-                              ? const CircularProgressIndicator()
-                              : Text(
-                              'Sell',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontSize: 18,
-                                  color: Theme.of(context).colorScheme.primary
-                              )
-                          ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        ),
+                        border: const OutlineInputBorder(),
+                        suffixText: coin!.symbol,
+                        suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showBuyDialog(BuildContext context, CryptoCoinDetail coinDetails) {
-    final TextEditingController amountController = TextEditingController();
-    final TextEditingController usdController = TextEditingController();
-    final authState = context.read<AuthBloc>().state;
-    bool _isAmountFieldFocused = false;
-    bool _isUsdFieldFocused = false;
-    bool _isProcessing = false;
-
-    if (authState is! Authenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login to purchase')),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthScreen()),
-      );
-      return;
-    }
-
-    // Функция для обновления полей
-    void updateFields({bool fromAmount = true}) {
-      final price = coinDetails.priceInUSD;
-
-      if (fromAmount && _isAmountFieldFocused) {
-        final amountText = amountController.text;
-        if (amountText.isNotEmpty) {
-          final amount = double.tryParse(amountText) ?? 0;
-          usdController.text = (amount * price).toStringAsFixed(2);
-        } else {
-          usdController.clear();
-        }
-      } else if (!fromAmount && _isUsdFieldFocused) {
-        final usdText = usdController.text;
-        if (usdText.isNotEmpty) {
-          final usd = double.tryParse(usdText) ?? 0;
-          amountController.text = (usd / price).toStringAsFixed(8);
-        } else {
-          amountController.clear();
-        }
-      }
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return StatefulBuilder( // Добавляем StatefulBuilder для обновления состояния
-        builder: (context, setState) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.5,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Buy ${coinDetails.name}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
-                controller: amountController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: 'Amount ${coin!.symbol}',
-                  labelStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                  ),
-                  border: const OutlineInputBorder(),
-                  suffixText: coin!.symbol,
-                  suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
-                ),
-                onChanged: (_) => updateFields(fromAmount: true),
-                onTap: () {
-                  _isAmountFieldFocused = true;
-                  _isUsdFieldFocused = false;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
-                controller: usdController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: 'Total USD',
-                  labelStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                  ),
-                  border: OutlineInputBorder(),
-                  suffixText: 'USD',
-                  suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
-                ),
-                onChanged: (_) => updateFields(fromAmount: false),
-                onTap: () {
-                  _isAmountFieldFocused = false;
-                  _isUsdFieldFocused = true;
-                },
-              ),
-              const SizedBox(height: 10),
-              _buildQuickAmountButtons(true, coinDetails, amountController, usdController),
-              const SizedBox(height: 10),
-              Text(
-                'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade600,
-                      ),
-                      onPressed: _isProcessing
-                          ? null
-                          : () => Navigator.pop(context),
-                      child: Text(
-                          'Cancel',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.primary
-                          )
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade900,
-                      ),
-                      onPressed: _isProcessing
-                          ? null
-                          : () async {
-                        setState(() => _isProcessing = true);
-                        try {
-                          final amount = double.tryParse(amountController.text);
-                          final usdAmount = double.tryParse(usdController.text);
-
-                          if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-                            throw Exception('Enter correct amount');
-                          }
-
-                          await _processPurchase(
-                            context,
-                            amount,
-                            usdAmount,
-                            coin!.symbol,
-                            coinDetails,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Successfully purchased $amount ${coin!.symbol}')),
-                          );
-                          Navigator.pop(context); // Закрываем только после успеха
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.toString())),
-                          );
-                          Navigator.pop(context);
-                        } finally {
-                          setState(() => _isProcessing = false);
-                        }
+                      onChanged: (value) {
+                        updateFields(value, true);
                       },
-                      child: _isProcessing
-                          ? const CircularProgressIndicator()
-                          : Text(
-                          'Buy',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.primary
-                          )
-                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    TextField(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 18),
+                      controller: usdController,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: 'Total USD',
+                        labelStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        ),
+                        border: OutlineInputBorder(),
+                        suffixText: 'USD',
+                        suffixStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                      ),
+                      onChanged: (value) {
+                        updateFields(value, false);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildQuickAmountButtons(isBuy, coinDetails, amountController, usdController),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Current price: ${formatCryptoPrice(coinDetails.priceInUSD)} \$',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey.shade600,
+                            ),
+                            onPressed: isProcessing
+                                ? null
+                                : () => Navigator.pop(context),
+                            child: Text(
+                                'Cancel',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 18,
+                                    color: Theme.of(context).colorScheme.primary
+                                )
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isBuy ? Colors.green.shade900 : Colors.red.shade900,
+                            ),
+                            onPressed: isProcessing
+                                ? null
+                                : processTrade,
+                            child: isProcessing
+                                ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                                : Text(
+                                isBuy ? 'Buy' : 'Sell',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 18,
+                                    color: Theme.of(context).colorScheme.primary
+                                )
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-          ),
+            );
+          },
         );
       },
     );
@@ -823,7 +642,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green.shade900,
                       ),
-                      onPressed: () => _showBuyDialog(context, coinDetails),
+                      onPressed: () => _showTradeDialog(context, coinDetails, true),
                       child: Text(
                         'Buy',
                         style: TextStyle(
@@ -840,7 +659,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red.shade900,
                       ),
-                      onPressed: () => _showSellDialog(context, coinDetails),
+                      onPressed: () => _showTradeDialog(context, coinDetails, false),
                       child: Text(
                         'Sell',
                         style: TextStyle(

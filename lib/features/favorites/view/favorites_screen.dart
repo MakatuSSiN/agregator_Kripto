@@ -10,44 +10,49 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+        appBar: AppBar(
+          title: Text('Favorites', style: Theme.of(context).textTheme.bodyMedium,),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+        body: BlocListener<AuthBloc, AuthState>(
         listener: (context, authState) {
-      if (authState is Authenticated) {
-        // При изменении состояния аутентификации загружаем избранное
-        context.read<FavoritesBloc>().add(LoadFavorites());
-      }
-    },
-    child: BlocListener<FavoritesBloc, FavoritesState>(
-    listener: (context, state) {
-    if (state is FavoritesError) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(state.message)),
+          if (authState is Authenticated) {
+            // При изменении состояния аутентификации загружаем избранное
+            context.read<FavoritesBloc>().add(LoadFavorites());
+          }
+        },
+        child: BlocListener<FavoritesBloc, FavoritesState>(
+            listener: (context, state) {
+              if (state is FavoritesError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message)),
+                );
+              }
+            },
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                return BlocBuilder<FavoritesBloc, FavoritesState>(
+                  builder: (context, state) {
+                    if (state is FavoritesLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is FavoritesError) {
+                      return Center(child: Text(state.message));
+                    }
+                    if (state is FavoritesLoaded) {
+                      return _buildFavoritesList(context, state.favorites);
+                    }
+                    return const Center(child: Text('Loading...'));
+                    },
+                );
+                },
+            )
+        )
+        )
     );
-    }
-    },
-    child: BlocBuilder<AuthBloc, AuthState>(
-    builder: (context, authState) {
-
-    return BlocBuilder<FavoritesBloc, FavoritesState>(
-    builder: (context, state) {
-    if (state is FavoritesLoading) {
-    return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state is FavoritesError) {
-    return Center(child: Text(state.message));
-    }
-
-    if (state is FavoritesLoaded) {
-    return _buildFavoritesList(context, state.favorites);
-    }
-
-    return const Center(child: Text('Loading...'));
-          },
-        );
-      },
-    )
-    ));
   }
 
 
