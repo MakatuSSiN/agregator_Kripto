@@ -89,7 +89,7 @@ class _UserProfile extends StatelessWidget {
           body: TabBarView(
             children: [
               ProfileInfo(user: user),
-              const PortfolioList(),
+              PortfolioList(),
             ],
           ),
         ),

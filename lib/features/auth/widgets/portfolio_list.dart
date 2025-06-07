@@ -1,10 +1,45 @@
+import 'package:agregator_kripto/features/crypto_coin/widgets/crypto_trade_dialog.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/abstract_coins_repository.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/models/crypto_coin.dart';
+import 'package:agregator_kripto/repositories/crypto_coins/models/portfolio_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../bloc/portfolio/portfolio_bloc.dart';
 
 class PortfolioList extends StatelessWidget {
-  const PortfolioList({super.key});
+  PortfolioList({super.key});
+
+  void _showSellDialog(BuildContext context, PortfolioItem item) async {
+    try {
+      final coinDetails = await GetIt.I<AbstractCoinsRepository>()
+          .getCoinDetails(item.coinName);
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          final tempCoin = CryptoCoin(
+            symbol: item.coinSymbol,
+            name: item.coinName,
+            priceInUSD: coinDetails.priceInUSD, // Используем цену из coinDetails
+            imageUrl: item.imageUrl, // Используем изображение из portfolio item
+          );
+
+          return CryptoTradeDialog(
+            coin: tempCoin,
+            coinDetails: coinDetails,
+            isBuy: false,
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load price data: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +74,19 @@ class PortfolioList extends StatelessWidget {
                   item.amount.toStringAsFixed(4),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                trailing: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade900,
+                  ),
+                  onPressed: () => _showSellDialog(context, item),
+                  child: Text('Sell',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                )
 
               );
             },
