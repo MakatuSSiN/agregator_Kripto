@@ -11,7 +11,6 @@ class LoadPortfolio extends PortfolioEvent {}
 
 class PortfolioUpdated extends PortfolioEvent {
   final List<DocumentSnapshot> docs;
-
   const PortfolioUpdated(this.docs);
 
   @override

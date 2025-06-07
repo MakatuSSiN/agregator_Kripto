@@ -12,27 +12,27 @@ class LoadBalance extends BalanceEvent {}
 class UpdateBalance extends BalanceEvent {
   final double amount;
   final bool isSpending;
-
   const UpdateBalance(this.amount, this.isSpending);
 
   @override
   List<Object> get props => [amount, isSpending];
 }
+
 class CheckBalance extends BalanceEvent {
   final double amountToCheck;
-
   const CheckBalance(this.amountToCheck);
 
   @override
   List<Object> get props => [amountToCheck];
 }
+
 class SubscribeToBalance extends BalanceEvent {
   const SubscribeToBalance();
 }
+
 class SellCrypto extends BalanceEvent {
   final double amount;
   final bool isSpending; // false для продажи
-
   const SellCrypto(this.amount, this.isSpending);
 
   @override

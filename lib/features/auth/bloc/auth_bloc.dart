@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResendVerificationRequested>(_resendVerification);
     on<LoadFavoritesRequested>(_loadFavorites);
   }
+
   Future<void> _authCheck(AuthCheckRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -42,6 +43,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthError(e is AuthException ? e.message : e.toString()));
     }
   }
+
   Future<void> _loadFavorites(LoadFavoritesRequested event, Emitter<AuthState> emit) async {
     try {
       if (state is Authenticated) {
@@ -63,6 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }) async {
     add(SignInRequested(email, password));
   }
+
   Future<void> _signIn(SignInRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {

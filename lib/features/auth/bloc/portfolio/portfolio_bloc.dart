@@ -61,6 +61,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       emit(PortfolioLoadFailure(e.toString()));
     }
   }
+
   Future<void> reduceCryptoAmount(String coinSymbol, double amount) async {
     final user = firebaseAuth.currentUser;
     if (user == null) return;
@@ -91,6 +92,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       }
     });
   }
+
   @override
   Future<void> close() {
     _portfolioSubscription?.cancel();

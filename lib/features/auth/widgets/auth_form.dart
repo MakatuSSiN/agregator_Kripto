@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../repositories/auth_repository.dart';
+import 'widgets.dart';
+
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key});
 
@@ -29,6 +31,7 @@ class _AuthFormState extends State<AuthForm> {
       _startResendTimer();
     }
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -37,6 +40,7 @@ class _AuthFormState extends State<AuthForm> {
       _startResendTimer();
     }
   }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -44,6 +48,7 @@ class _AuthFormState extends State<AuthForm> {
     _resendTimer?.cancel();
     super.dispose();
   }
+
   void _startResendTimer() {
     // Сбрасываем предыдущий таймер, если он был
     _resendTimer?.cancel();
@@ -84,7 +89,36 @@ class _AuthFormState extends State<AuthForm> {
       },
       builder: (context, state) {
         if (state is EmailVerificationSent) {
-          return _buildVerificationSent(state.email);
+          return VerificationSentWidget(
+            email: state.email,
+            canResend: _canResendEmail,
+            resendCooldown: _resendCooldown,
+            onResendPressed: () {
+              context.read<AuthBloc>().add(ResendVerificationRequested(state.email));
+              _startResendTimer();
+            },
+            onVerifiedPressed: () async {
+              try {
+                await FirebaseAuth.instance.currentUser?.reload();
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user?.emailVerified ?? false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Email successfully verified!')),
+                  );
+                  context.read<AuthBloc>().add(AuthCheckRequested());
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please verify your email first')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: ${e is AuthException ? e.message : e.toString()}')),
+                );
+              }
+            },
+          );
         }
         return _buildAuthForm(state);
       },
@@ -116,9 +150,9 @@ class _AuthFormState extends State<AuthForm> {
               ),
               decoration: InputDecoration(
                 labelText: 'Email',
-              labelStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary
-              ),
+                labelStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary
+                ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
                 ),
@@ -143,7 +177,7 @@ class _AuthFormState extends State<AuthForm> {
                 fontSize: 18,
               ),
               decoration: InputDecoration(
-                  labelText: 'Password',
+                labelText: 'Password',
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary
                 ),
@@ -201,105 +235,105 @@ class _AuthFormState extends State<AuthForm> {
     );
   }
 
-  Widget _buildVerificationSent(String email) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-                Icons.mark_email_read,
-                size: 64,
-              color: Theme.of(context).colorScheme.secondary
-          ),
-            const SizedBox(height: 24),
-            Text(
-              'Verification Email Sent',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Please check your email $email and click the verification link',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary
-              ),
-            ),
-            const SizedBox(height: 32),
-            BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
-                }
-              },
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: () async {
-                  try {
-                    await FirebaseAuth.instance.currentUser?.reload();
-                    final user = FirebaseAuth.instance.currentUser;
-
-                    if (user?.emailVerified ?? false) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Email successfully verified!')),
-                      );
-                      // Очищаем возможные предыдущие ошибки
-                      context.read<AuthBloc>().add(AuthCheckRequested());
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please verify your email first')),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: ${e is AuthException ? e.message : e.toString()}')),
-                    );
-                  }
-                },
-                child: Text('I have verified my email'),
-              ),
-            ),
-            TextButton(
-              onPressed: _canResendEmail ? () {
-                context.read<AuthBloc>().add(
-                  ResendVerificationRequested(email),
-                );
-                _startResendTimer();
-              } : null,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Resend verification email',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary
-                    ),
-                  ),
-                  if (!_canResendEmail) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      '($_resendCooldown)',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildVerificationSent(String email) {
+  //   return Center(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Icon(
+  //               Icons.mark_email_read,
+  //               size: 64,
+  //               color: Theme.of(context).colorScheme.secondary
+  //           ),
+  //           const SizedBox(height: 24),
+  //           Text(
+  //             'Verification Email Sent',
+  //             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  //                 color: Theme.of(context).colorScheme.secondary
+  //             ),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             'Please check your email $email and click the verification link',
+  //             textAlign: TextAlign.center,
+  //             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  //                 color: Theme.of(context).colorScheme.secondary
+  //             ),
+  //           ),
+  //           const SizedBox(height: 32),
+  //           BlocListener<AuthBloc, AuthState>(
+  //             listener: (context, state) {
+  //               if (state is AuthError) {
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                   SnackBar(content: Text(state.message)),
+  //                 );
+  //               }
+  //             },
+  //             child: ElevatedButton(
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Theme.of(context).colorScheme.secondary,
+  //                 foregroundColor: Theme.of(context).colorScheme.primary,
+  //               ),
+  //               onPressed: () async {
+  //                 try {
+  //                   await FirebaseAuth.instance.currentUser?.reload();
+  //                   final user = FirebaseAuth.instance.currentUser;
+  //
+  //                   if (user?.emailVerified ?? false) {
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(content: Text('Email successfully verified!')),
+  //                     );
+  //                     // Очищаем возможные предыдущие ошибки
+  //                     context.read<AuthBloc>().add(AuthCheckRequested());
+  //                   } else {
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(content: Text('Please verify your email first')),
+  //                     );
+  //                   }
+  //                 } catch (e) {
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     SnackBar(content: Text('Error: ${e is AuthException ? e.message : e.toString()}')),
+  //                   );
+  //                 }
+  //               },
+  //               child: Text('I have verified my email'),
+  //             ),
+  //           ),
+  //           TextButton(
+  //             onPressed: _canResendEmail ? () {
+  //               context.read<AuthBloc>().add(
+  //                 ResendVerificationRequested(email),
+  //               );
+  //               _startResendTimer();
+  //             } : null,
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Text(
+  //                   'Resend verification email',
+  //                   style: TextStyle(
+  //                       color: Theme.of(context).colorScheme.secondary
+  //                   ),
+  //                 ),
+  //                 if (!_canResendEmail) ...[
+  //                   const SizedBox(width: 8),
+  //                   Text(
+  //                     '($_resendCooldown)',
+  //                     style: TextStyle(
+  //                         color: Theme.of(context).colorScheme.secondary
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {

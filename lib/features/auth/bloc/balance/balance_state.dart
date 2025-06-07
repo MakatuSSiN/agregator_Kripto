@@ -13,7 +13,6 @@ class BalanceLoading extends BalanceState {}
 
 class BalanceLoaded extends BalanceState {
   final double amount;
-
   const BalanceLoaded(this.amount);
 
   @override
@@ -22,7 +21,6 @@ class BalanceLoaded extends BalanceState {
 
 class BalanceOperationSuccess extends BalanceState {
   final double newBalance;
-
   const BalanceOperationSuccess(this.newBalance);
 
   @override
@@ -31,7 +29,6 @@ class BalanceOperationSuccess extends BalanceState {
 
 class BalanceError extends BalanceState {
   final String message;
-
   const BalanceError(this.message);
 
   @override
