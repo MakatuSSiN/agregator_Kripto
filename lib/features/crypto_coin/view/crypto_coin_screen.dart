@@ -52,6 +52,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     _loadInitialChart();
 
     _zoomPanBehavior = ZoomPanBehavior(
+        enableMouseWheelZooming: true,
         enablePinching: true,
         enableDoubleTapZooming: false,
         enablePanning: true,
