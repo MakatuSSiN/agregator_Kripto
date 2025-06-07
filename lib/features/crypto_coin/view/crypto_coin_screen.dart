@@ -170,68 +170,30 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          actions: [
-            IconButton(
-              icon: Icon(
-                _isFavorite ? Icons.star : Icons.star_border,
-                color: _isFavorite ? Colors.yellow : Theme.of(context).appBarTheme.iconTheme?.color,
-              ),
-              onPressed: () {
-                final authState = context.read<AuthBloc>().state;
-                if (authState is! Authenticated) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please sign in to add favorites')),
-                  );
-                  // Используем Navigator вместо доступа к состоянию
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AuthScreen()),
-                  );
-                  return;
-                }
+        appBar: CryptoCoinAppBar(
+          coin: coin,
+          coinDetailsBloc: _coinDetailsBloc,
+          isFavorite: _isFavorite,
+          onFavoritePressed: () {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is! Authenticated) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please sign in to add favorites')),
+              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AuthScreen()),
+              );
+              return;
+            }
 
-                if (coin != null) {
-                  context.read<FavoritesBloc>().add(ToggleFavorite(coin!));
-                  setState(() {
-                    _isFavorite = !_isFavorite;
-                  });
-                }
-              },
-            ),
-          ],
-          //iconTheme: const IconThemeData(color: Colors.white),
-          title: BlocBuilder<CryptoCoinDetailsBloc, CryptoCoinDetailsState>(
-            bloc: _coinDetailsBloc,
-            builder: (context, state) {
-              if (state is CryptoCoinDetailsLoaded) {
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: 45,
-                      height: 45,
-                      child: Image.network(
-                        state.coinDetails.imageUrl,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.currency_bitcoin),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${state.coinDetails.name}/USD',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return const Text('Loading...');
-            },
-          ),
-          centerTitle: true,
+            if (coin != null) {
+              context.read<FavoritesBloc>().add(ToggleFavorite(coin!));
+              setState(() {
+                _isFavorite = !_isFavorite;
+              });
+            }
+          },
         ),
 
 

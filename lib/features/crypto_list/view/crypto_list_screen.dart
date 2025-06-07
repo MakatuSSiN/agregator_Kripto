@@ -10,6 +10,8 @@ import '../../favorites/view/favorites_screen.dart';
 import '../bloc/crypto_list_bloc.dart';
 import '../widgets/widgets.dart';
 
+/// Основной экран приложения с навигацией между:
+/// Списком криптовалют, избранным, профилем
 class CryptoListScreen extends StatefulWidget {
   const CryptoListScreen({super.key, required this.title});
   final String title;
@@ -27,6 +29,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
       _currentPageIndex = index;
     });
   }
+  /// Список страниц приложения
   final List<Widget> _pages = [
     const _CryptoListContent(),
     const FavoritesScreen(),
@@ -36,9 +39,10 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   @override
   void initState() {
     super.initState();
+    // Инициализация BLoC и загрузка данных
     _cryptoListBloc = context.read<CryptoListBloc>();
     _cryptoListBloc.add(LoadCryptoList());
-// Слушаем изменения аутентификации
+    // Слушаем изменения аутентификации
     context.read<AuthBloc>().stream.listen((authState) {
       if (authState is Unauthenticated) {
         context.read<FavoritesBloc>().add(FavoritesUpdated([]));
@@ -52,6 +56,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     super.dispose();
   }
 
+  /// Установка индекса текущей страницы
   void setPageIndex(int index) {
     setState(() {
       _currentPageIndex = index;
@@ -62,6 +67,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
+      // AppBar только для главной страницы
       appBar: _currentPageIndex == 0 ? _buildAppBar(context) : null,
       body: IndexedStack(
         index: _currentPageIndex,
@@ -76,6 +82,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     );
   }
 
+  /// Построение AppBar для главной страницы
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -104,6 +111,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   }
 }
 
+/// Виджет содержимого главной страницы с криптовалютами
 class _CryptoListContent extends StatelessWidget {
   const _CryptoListContent();
 
@@ -126,6 +134,7 @@ class _CryptoListContent extends StatelessWidget {
               itemCount: state.filteredCoins.length,
               itemBuilder: (context, index) {
                 final coin = state.filteredCoins[index];
+                // Виджет элемента списка
                 return CryptoCoinTile(coin: coin);
               },
             ),

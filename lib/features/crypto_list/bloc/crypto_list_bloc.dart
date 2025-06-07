@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'crypto_list_event.dart';
 part 'crypto_list_state.dart';
 
+/// BLoC для управления списком криптовалют
+/// Обрабатывает загрузку и поиск по списку криптовалют
 class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
   final AbstractCoinsRepository coinsRepository;
   List<CryptoCoin> _allCoins = [];
@@ -15,6 +17,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     on<SearchCryptoList>(_search);
   }
 
+  /// Загрузка списка криптовалют
   Future<void> _load(
       LoadCryptoList event,
       Emitter<CryptoListState> emit,
@@ -31,13 +34,16 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     }
   }
 
+  /// Поиск по списку криптовалют
   void _search(
       SearchCryptoList event,
       Emitter<CryptoListState> emit,
       ) {
+    // Поиск возможен только если данные уже загружены
     if (state is! CryptoListLoaded) return;
     final query = event.query.toLowerCase();
 
+    // Если запрос пустой - показываем все криптовалюты
     if (query.isEmpty) {
       emit(CryptoListLoaded(
         coinsList: _allCoins,
@@ -46,6 +52,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
       return;
     }
 
+    // Фильтрация криптовалют по имени
     final filtered = _allCoins.where((coin) {
       return coin.name.toLowerCase().contains(query);
     }).toList();
