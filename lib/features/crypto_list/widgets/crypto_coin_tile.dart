@@ -14,47 +14,47 @@ class CryptoCoinTile extends StatelessWidget {
 
   final CryptoCoin coin;
   final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
-
     return BlocBuilder<FavoritesBloc, FavoritesState>(
-        builder: (context, state) {
-          final isFavorite = state is FavoritesLoaded
-              ? state.favorites.any((c) => c.symbol == coin.symbol)
-              : false;
-    final theme = Theme.of(context);
-    return ListTile(
-      leading: SizedBox(
-        width: 40,
-        height: 40,
-        child: Image.network(coin.imageUrl),
-      ),
-      title: Text(
-        coin.name,
-        style: theme.textTheme.bodyMedium,
-      ),
-      subtitle: Text(
-        "${formatCryptoPrice(coin.priceInUSD)} \$",
-        style: theme.textTheme.labelSmall,
-      ),
-      trailing: IconButton(
-        icon: Icon(
-          isFavorite ? Icons.star : Icons.star_border,
-          color: isFavorite ? Colors.yellow : Colors.grey,
-        ),
-        onPressed: () {
-          final newCoin = coin.copyWith(isFavorite: !isFavorite);
-          context.read<FavoritesBloc>().add(ToggleFavorite(newCoin));
-        },
-      ),
-      onTap: () {
-        Navigator.of(context).pushNamed(
-          '/coin',
-          arguments: coin,
+      builder: (context, state) {
+        final isFavorite = state is FavoritesLoaded
+            ? state.favorites.any((c) => c.symbol == coin.symbol)
+            : false;
+        final theme = Theme.of(context);
+        return ListTile(
+          leading: SizedBox(
+            width: 40,
+            height: 40,
+            child: Image.network(coin.imageUrl),
+          ),
+          title: Text(
+            coin.name,
+            style: theme.textTheme.bodyMedium,
+          ),
+          subtitle: Text(
+            "${formatCryptoPrice(coin.priceInUSD)} \$",
+            style: theme.textTheme.labelSmall,
+          ),
+          trailing: IconButton(
+            icon: Icon(
+              isFavorite ? Icons.star : Icons.star_border,
+              color: isFavorite ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              final newCoin = coin.copyWith(isFavorite: !isFavorite);
+              context.read<FavoritesBloc>().add(ToggleFavorite(newCoin));
+            },
+          ),
+          onTap: () {
+            Navigator.of(context).pushNamed(
+              '/coin',
+              arguments: coin,
+            );
+          },
         );
       },
-    );
-        },
     );
   }
 }

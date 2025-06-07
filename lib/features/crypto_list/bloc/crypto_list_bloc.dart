@@ -10,18 +10,11 @@ part 'crypto_list_state.dart';
 class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
   final AbstractCoinsRepository coinsRepository;
   List<CryptoCoin> _allCoins = [];
-  //late Timer _timer;
-
   CryptoListBloc(this.coinsRepository) : super(CryptoListInitial()) {
     on<LoadCryptoList>(_load);
     on<SearchCryptoList>(_search);
-    //_startAutoRefresh();
   }
-  // void _startAutoRefresh() {
-  //   _timer = Timer.periodic(const Duration(seconds: 100), (timer) {
-  //     add(LoadCryptoList());
-  //   });
-  // }
+
   Future<void> _load(
       LoadCryptoList event,
       Emitter<CryptoListState> emit,
@@ -37,6 +30,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
       emit(CryptoListLoadingFailure(e));
     }
   }
+
   void _search(
       SearchCryptoList event,
       Emitter<CryptoListState> emit,

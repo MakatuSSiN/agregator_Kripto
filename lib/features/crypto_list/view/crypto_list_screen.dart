@@ -1,5 +1,4 @@
 import 'package:agregator_kripto/features/crypto_list/widgets/crypto_coin_tile.dart';
-import 'package:agregator_kripto/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import '../../auth/view/auth_screen.dart';
 import '../../favorites/bloc/favorites_bloc.dart';
 import '../../favorites/view/favorites_screen.dart';
 import '../bloc/crypto_list_bloc.dart';
+import '../widgets/widgets.dart';
 
 class CryptoListScreen extends StatefulWidget {
   const CryptoListScreen({super.key, required this.title});
@@ -67,37 +67,10 @@ class CryptoListScreenState extends State<CryptoListScreen> {
         index: _currentPageIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) { // Получаем authState здесь
-          return NavigationBar(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            selectedIndex: _currentPageIndex,
-            onDestinationSelected: (index) {
-              if (index == 1 && authState is! Authenticated) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please sign in to view favorites')),
-                );
-                return;
-              }
-              setState(() {
-                _currentPageIndex = index;
-              });
-            },
-            destinations: const [
-              NavigationDestination(
-                  icon: Icon(Icons.home),
-                  label: 'Home'
-              ),
-              NavigationDestination(
-                  icon: Icon(Icons.star),
-                  label: 'Favorites'
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
-          );
+      bottomNavigationBar: CustomNavigationBar(
+        currentIndex: _currentPageIndex,
+        onIndexChanged: (index) {
+          setState(() => _currentPageIndex = index);
         },
       ),
     );
@@ -116,61 +89,16 @@ class CryptoListScreenState extends State<CryptoListScreen> {
         width: 60,
         height: 60,
         child: Image.asset(
-            "assets/logoOMGEX.png",
+          "assets/logoOMGEX.png",
           fit: BoxFit.cover,
         ),
       ),
-      actions: [
-        Consumer<ThemeProvider>(
-          builder: (context, themeProvider, child) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.nightlight_round
-                      : Icons.wb_sunny,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                const SizedBox(width: 8),
-                Switch(
-                  value: themeProvider.themeMode == ThemeMode.dark,
-                  onChanged: (value) {
-                    themeProvider.toggleTheme(value);
-                  },
-                  activeColor: Colors.yellow,
-                  inactiveThumbColor: Colors.black,
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: TextField(
-            controller: _searchController,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary, // Цвет текста оси X
-            ),
-            decoration: InputDecoration(
-              hintText: 'Search cryptocurrencies...',
-              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                fontSize: 18
-              ),
-              prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onPrimary),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onChanged: (query) {
-              _cryptoListBloc.add(SearchCryptoList(query));
-            },
-          ),
-        ),
+      actions: const [ThemeSwitcher()],
+      bottom: CryptoSearchBar(
+        controller: _searchController,
+        onSearchChanged: (query) {
+          _cryptoListBloc.add(SearchCryptoList(query));
+        },
       ),
     );
   }
