@@ -23,6 +23,7 @@ class VerificationSentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+        child: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -92,6 +93,6 @@ class VerificationSentWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
