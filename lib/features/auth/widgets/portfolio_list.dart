@@ -39,6 +39,7 @@ class PortfolioList extends StatelessWidget {
                   item.amount.toStringAsFixed(4),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+
               );
             },
           );
