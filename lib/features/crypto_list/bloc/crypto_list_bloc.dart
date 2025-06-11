@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:dio/dio.dart';
 import 'package:agregator_kripto/repositories/crypto_coins/crypto_coins.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,8 +29,13 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
         coinsList: _allCoins,
         filteredCoins: _allCoins,
       ));
+    } on DioException catch (e) {
+      emit(CryptoListLoadingFailure(
+        e,
+        isConnectionError: e.type == DioExceptionType.connectionError,
+      ));
     } catch (e) {
-      emit(CryptoListLoadingFailure(e));
+      emit(CryptoListLoadingFailure(e, isConnectionError: false));
     }
   }
 

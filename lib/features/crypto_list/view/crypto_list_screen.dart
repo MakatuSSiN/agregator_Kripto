@@ -24,6 +24,7 @@ class CryptoListScreenState extends State<CryptoListScreen> {
   int _currentPageIndex = 0;
   final _searchController = TextEditingController();
   late final CryptoListBloc _cryptoListBloc;
+  bool _showNavigation = true;
   void changePage(int index) {
     setState(() {
       _currentPageIndex = index;
@@ -42,6 +43,17 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     // Инициализация BLoC и загрузка данных
     _cryptoListBloc = context.read<CryptoListBloc>();
     _cryptoListBloc.add(LoadCryptoList());
+    _cryptoListBloc.stream.listen((state) { //для экрана без интернета
+      if (state is CryptoListLoadingFailure && state.isConnectionError) {
+        setState(() {
+          _showNavigation = false; // Скрываем навигацию при ошибке соединения
+        });
+      } else {
+        setState(() {
+          _showNavigation = true; // Показываем навигацию в других случаях
+        });
+      }
+    });
     // Слушаем изменения аутентификации
     context.read<AuthBloc>().stream.listen((authState) {
       if (authState is Unauthenticated) {
@@ -68,17 +80,21 @@ class CryptoListScreenState extends State<CryptoListScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       // AppBar только для главной страницы
-      appBar: _currentPageIndex == 0 ? _buildAppBar(context) : null,
+      appBar: _showNavigation && _currentPageIndex == 0
+          ? _buildAppBar(context)
+          : null,
       body: IndexedStack(
         index: _currentPageIndex,
         children: _pages,
       ),
-      bottomNavigationBar: CustomNavigationBar(
+      bottomNavigationBar: _showNavigation
+          ? CustomNavigationBar(
         currentIndex: _currentPageIndex,
         onIndexChanged: (index) {
           setState(() => _currentPageIndex = index);
         },
-      ),
+      )
+          : null,
     );
   }
 
@@ -123,6 +139,35 @@ class _CryptoListContent extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is CryptoListLoadingFailure) {
+          if (state.isConnectionError) {
+            return Container(
+              color: Theme.of(context).colorScheme.primary,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.wifi_off, size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Нет соединения с интернетом',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () {
+                        context.read<CryptoListBloc>().add(LoadCryptoList());
+                      },
+                      child: const Text('Повторить попытку'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           return Center(child: Text('Ошибка: ${state.exception}'));
         }
         if (state is CryptoListLoaded) {
@@ -134,7 +179,6 @@ class _CryptoListContent extends StatelessWidget {
               itemCount: state.filteredCoins.length,
               itemBuilder: (context, index) {
                 final coin = state.filteredCoins[index];
-                // Виджет элемента списка
                 return CryptoCoinTile(coin: coin);
               },
             ),

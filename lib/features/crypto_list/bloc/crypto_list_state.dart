@@ -26,9 +26,10 @@ class CryptoListLoaded extends CryptoListState {
 
 class CryptoListLoadingFailure extends CryptoListState {
   final Object exception;
+  final bool isConnectionError;
 
-  const CryptoListLoadingFailure(this.exception);
+  const CryptoListLoadingFailure(this.exception, {this.isConnectionError = false});
 
   @override
-  List<Object> get props => [exception];
+  List<Object> get props => [exception, isConnectionError];
 }
