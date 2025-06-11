@@ -35,14 +35,14 @@ class VerificationSentWidget extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Verification Email Sent',
+              'Письмо с подтверждением отправлено',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.secondary,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Please check your email $email and click the verification link',
+              'Пожалуйста, проверьте свою почту $email и перейдите по ссылке для подтверждения',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
@@ -63,7 +63,7 @@ class VerificationSentWidget extends StatelessWidget {
                   foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 onPressed: onVerifiedPressed,
-                child: const Text('I have verified my email'),
+                child: const Text('Я подтвердил свою почту'),
               ),
             ),
             TextButton(
@@ -72,7 +72,7 @@ class VerificationSentWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Resend verification email',
+                    'Повторно отправить письмо',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.secondary,
                     ),

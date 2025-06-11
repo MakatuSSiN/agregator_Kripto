@@ -40,7 +40,7 @@ class CryptoCandleRepository {
         );
       }).toList();
     } catch (e) {
-      throw Exception('Failed to load chart data: $e');
+      throw Exception('Не удалось загрузить данные: $e');
     }
   }
 }

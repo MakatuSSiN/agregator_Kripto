@@ -104,17 +104,17 @@ class _AuthFormState extends State<AuthForm> {
 
                 if (user?.emailVerified ?? false) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Email successfully verified!')),
+                    const SnackBar(content: Text('Почта успешно проверена!')),
                   );
                   context.read<AuthBloc>().add(AuthCheckRequested());
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please verify your email first')),
+                    const SnackBar(content: Text('Пожалуйста, подтвердите почту')),
                   );
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${e is AuthException ? e.message : e.toString()}')),
+                  SnackBar(content: Text('Ошибка: ${e is AuthException ? e.message : e.toString()}')),
                 );
               }
             },
@@ -150,7 +150,7 @@ class _AuthFormState extends State<AuthForm> {
                 fontSize: 18,
               ),
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Электронная почта',
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary
                 ),
@@ -163,10 +163,10 @@ class _AuthFormState extends State<AuthForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter email';
+                  return 'Пожалуйста, введите почту';
                 }
                 if (!value.contains('@')) {
-                  return 'Please enter valid email';
+                  return 'Пожалуйста, введите правильную почту';
                 }
                 return null;
               },
@@ -178,7 +178,7 @@ class _AuthFormState extends State<AuthForm> {
                 fontSize: 18,
               ),
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: 'Пароль',
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary
                 ),
@@ -192,10 +192,10 @@ class _AuthFormState extends State<AuthForm> {
               obscureText: true,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter password';
+                  return 'Пожалуйста, введите пароль';
                 }
                 if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
+                  return 'Пароль должен содержать не менее 6 символов';
                 }
                 return null;
               },
@@ -215,7 +215,7 @@ class _AuthFormState extends State<AuthForm> {
               onPressed: state is AuthLoading ? null : _submit,
               child: state is AuthLoading
                   ? const CircularProgressIndicator()
-                  : Text(_isLogin ? 'Sign In' : 'Sign Up'),
+                  : Text(_isLogin ? 'Войти' : 'Зарегистрироваться'),
             ),
             TextButton(
               style: TextButton.styleFrom(
@@ -227,8 +227,8 @@ class _AuthFormState extends State<AuthForm> {
                 });
               },
               child: Text(_isLogin
-                  ? 'Create new account'
-                  : 'I already have an account'),
+                  ? 'Создать аккаунт'
+                  : 'У меня есть аккаунт'),
             ),
           ],
         ),

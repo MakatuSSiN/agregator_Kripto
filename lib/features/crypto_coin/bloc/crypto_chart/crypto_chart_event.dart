@@ -18,9 +18,9 @@ class LoadCryptoChart extends CryptoChartEvent {
 }
 
 enum TimeFrame {
-  minute('1m', '1Minute', 120),
-  hour('1h', '1Hour', 48),
-  day('1d', '1Day', 60);
+  minute('1m', 'Минута', 120),
+  hour('1h', 'Час', 48),
+  day('1d', 'День', 60);
 
   final String apiValue;
   final String displayName;

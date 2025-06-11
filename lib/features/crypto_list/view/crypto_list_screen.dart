@@ -123,7 +123,7 @@ class _CryptoListContent extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is CryptoListLoadingFailure) {
-          return Center(child: Text('Error: ${state.exception}'));
+          return Center(child: Text('Ошибка: ${state.exception}'));
         }
         if (state is CryptoListLoaded) {
           return RefreshIndicator(

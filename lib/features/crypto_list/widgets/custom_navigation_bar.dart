@@ -23,7 +23,7 @@ class CustomNavigationBar extends StatelessWidget {
           onDestinationSelected: (index) {
             if (index == 1 && authState is! Authenticated) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please sign in to view favorites')),
+                const SnackBar(content: Text('Войдите, чтобы посмотреть избранное')),
               );
               return;
             }
@@ -32,15 +32,15 @@ class CustomNavigationBar extends StatelessWidget {
           destinations: const [
             NavigationDestination(
                 icon: Icon(Icons.home),
-                label: 'Home'
+                label: 'Главная'
             ),
             NavigationDestination(
                 icon: Icon(Icons.star),
-                label: 'Favorites'
+                label: 'Избранное'
             ),
             NavigationDestination(
                 icon: Icon(Icons.person),
-                label: 'Profile'
+                label: 'Профиль'
             ),
           ],
         );

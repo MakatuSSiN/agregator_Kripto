@@ -23,7 +23,7 @@ class CryptoSearchBar extends StatelessWidget implements PreferredSizeWidget {
           color: Theme.of(context).colorScheme.onPrimary,
         ),
         decoration: InputDecoration(
-          hintText: 'Search cryptocurrencies...',
+          hintText: 'Поиск криптовалют...',
           hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
             fontSize: 18,

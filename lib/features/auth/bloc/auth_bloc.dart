@@ -59,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       }
     } catch (e) {
-      debugPrint('Failed to load favorites: $e');
+      debugPrint('Не удалось загрузить избранное: $e');
     }
   }
 

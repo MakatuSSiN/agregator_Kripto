@@ -13,7 +13,7 @@ class FavoritesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
         appBar: AppBar(
-          title: Text('Favorites', style: Theme.of(context).textTheme.bodyMedium,),
+          title: Text('Избранное', style: Theme.of(context).textTheme.bodyMedium,),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
         body: BlocListener<AuthBloc, AuthState>(
@@ -45,7 +45,7 @@ class FavoritesScreen extends StatelessWidget {
                     if (state is FavoritesLoaded) {
                       return _buildFavoritesList(context, state.favorites);
                     }
-                    return const Center(child: Text('Loading...'));
+                    return const Center(child: Text('Загрузка...'));
                     },
                 );
                 },
@@ -58,7 +58,7 @@ class FavoritesScreen extends StatelessWidget {
 
   Widget _buildFavoritesList(BuildContext context, List<CryptoCoin> favorites) {
     if (favorites.isEmpty) {
-      return const Center(child: Text('No favorites yet'));
+      return const Center(child: Text('Нет избранных криптовалют'));
     }
 
     return RefreshIndicator(

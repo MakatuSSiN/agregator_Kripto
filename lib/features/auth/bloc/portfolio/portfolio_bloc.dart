@@ -33,7 +33,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       ) async {
     final user = firebaseAuth.currentUser;
     if (user == null) {
-      emit(PortfolioLoadFailure('User not authenticated'));
+      emit(PortfolioLoadFailure('Пользователь не авторизован'));
       return;
     }
 
@@ -81,10 +81,10 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
 
       // Получаем текущее количество монет
       final doc = await transaction.get(portfolioRef);
-      if (!doc.exists) throw Exception('Coin not found in portfolio');
+      if (!doc.exists) throw Exception('Монета не найдена в портфеле');
 
       final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
-      if (currentAmount < amount) throw Exception('Not enough coins to sell');
+      if (currentAmount < amount) throw Exception('Недостаточно монет для продажи');
 
       final newAmount = currentAmount - amount;
 

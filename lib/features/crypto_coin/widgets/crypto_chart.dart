@@ -85,7 +85,7 @@ class CryptoChart extends StatelessWidget {
           numberFormat: NumberFormat.currency(
             symbol: '',
             decimalDigits: _getDecimalDigits(_getCurrentPriceRange(chartData)),
-          ),//_getDecimalDigits(_getCurrentPriceRange(chartData)),),
+          ),
           labelStyle: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
@@ -98,7 +98,6 @@ class CryptoChart extends StatelessWidget {
             maximumLabels: 3,
             edgeLabelPlacement: EdgeLabelPlacement.hide,
           rangePadding: ChartRangePadding.additional,
-          //interval: _calculateYInterval(chartData),
           interactiveTooltip: InteractiveTooltip(
               enable: true,
               textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
@@ -110,12 +109,7 @@ class CryptoChart extends StatelessWidget {
         borderWidth: 0,
         plotAreaBorderWidth: 0,
         margin: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-        // indicators: [
-        //   RocIndicator<dynamic, dynamic>(
-        //     period: 1,
-        //     seriesName: 'val/usd',
-        //   ),
-        // ],
+
       ),
 
 
@@ -156,19 +150,6 @@ class CryptoChart extends StatelessWidget {
     final prices = data.map((d) => d.high).toList();
     return prices.reduce((a, b) => a > b ? a : b);
   }
-
-
-  // double _calculateYInterval(List<ChartSampleData> data) {
-  //   if (data.isEmpty) return 1;
-  //   final priceRange = _getCurrentPriceRange(data);
-
-  //   // Автоматический расчет интервала в зависимости от диапазона цен
-  //   if (priceRange > 5000) return 1000;
-  //   if (priceRange > 100) return 10;
-  //   if (priceRange > 10) return 1;
-  //   if (priceRange > 1) return 0.1;
-  //   return 0.01;
-  // }
 
 
 }

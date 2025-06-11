@@ -21,7 +21,7 @@ class AuthScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
         title: Text(
-          'Profile',
+          'Профиль',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -73,7 +73,7 @@ class _UserProfile extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
             title: Text(
-              user.email ?? 'Profile',
+              user.email ?? 'Профиль',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 22),
             ),
             bottom: TabBar(

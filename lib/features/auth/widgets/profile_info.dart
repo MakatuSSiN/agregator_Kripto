@@ -42,14 +42,14 @@ class ProfileInfo extends StatelessWidget {
             builder: (context, state) {
               if (state is BalanceLoaded) {
                 return Text(
-                  'Balance: ${state.amount.toStringAsFixed(2)} USD',
+                  'Баланс: ${state.amount.toStringAsFixed(2)} USD',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 );
               } else if (state is BalanceError) {
-                return Text('Error: ${state.message}');
+                return Text('Ошибка: ${state.message}');
               }
               return const CircularProgressIndicator();
             },
@@ -65,7 +65,7 @@ class ProfileInfo extends StatelessWidget {
               context.read<AuthBloc>().add(SignOutRequested());
             },
             child: Text(
-                'Sign Out',
+                'Выход',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Theme.of(context).colorScheme.primary
                 )),

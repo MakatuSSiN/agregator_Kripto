@@ -82,7 +82,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
       final usdAmount = double.tryParse(usdController.text);
 
       if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-        throw Exception('Enter correct amount');
+        throw Exception('Введите правильное количество');
       }
 
       if (widget.isBuy) {
@@ -110,7 +110,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
     // 1. Check balance
     final currentBalance = await balanceBloc.getCurrentBalance();
     if (currentBalance < usdAmount) {
-      throw Exception('Insufficient funds on balance');
+      throw Exception('Недостаточно средств на балансе');
     }
 
     // 2. Update balance
@@ -157,7 +157,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
     balanceBloc.add(LoadBalance());
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Successfully purchased $amount ${widget.coin.symbol}')),
+      SnackBar(content: Text('Успешно куплено $amount ${widget.coin.symbol}')),
     );
   }
 
@@ -185,7 +185,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
       balanceBloc.add(LoadBalance());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Successfully sold $amount ${widget.coin.symbol}')),
+        SnackBar(content: Text('Успешно продано $amount ${widget.coin.symbol}')),
       );
     } catch (e) {
       rethrow;
@@ -222,13 +222,13 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
           usdController.text = (amount * widget.coinDetails.priceInUSD).toStringAsFixed(2);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('You do not have ${widget.coin.symbol} in portfolio')),
+            SnackBar(content: Text('У вас нет ${widget.coin.symbol} в портфеле')),
           );
         }
       } else {
         portfolioBloc.add(LoadPortfolio());
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Loading portfolio data...')),
+          const SnackBar(content: Text('Загрузка портфеля...')),
         );
       }
     }
@@ -255,13 +255,13 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
           usdController.text = (item.amount * widget.coinDetails.priceInUSD).toStringAsFixed(2);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('You do not have ${widget.coin.symbol} in portfolio')),
+            SnackBar(content: Text('У вас нет ${widget.coin.symbol} в портфеле')),
           );
         }
       } else {
         portfolioBloc.add(LoadPortfolio());
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Loading portfolio data...')),
+          const SnackBar(content: Text('Загрузка портфеля...')),
         );
       }
     } else {
@@ -299,7 +299,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${widget.isBuy ? 'Buy' : 'Sell'} ${widget.coinDetails.name}',
+              '${widget.isBuy ? 'Купить' : 'Продать'} ${widget.coinDetails.name}',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
               ],
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                labelText: 'Amount ${widget.coin.symbol}',
+                labelText: 'Количество ${widget.coin.symbol}',
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary
                 ),
@@ -339,7 +339,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
               ],
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                labelText: 'Total USD',
+                labelText: 'Сумма в USD',
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary
                 ),
@@ -359,7 +359,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Quick selection:', style: TextStyle(fontSize: 16)),
+                const Text('Быстрый выбор:', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 5),
                 Wrap(
                   spacing: 8,
@@ -368,14 +368,14 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
                     _buildQuickButton('10%', () => _setQuickAmount(0.1)),
                     _buildQuickButton('25%', () => _setQuickAmount(0.25)),
                     _buildQuickButton('50%', () => _setQuickAmount(0.5)),
-                    _buildQuickButton('All', _setAllAmount),
+                    _buildQuickButton('Все', _setAllAmount),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
-              'Current price: ${formatCryptoPrice(widget.coinDetails.priceInUSD)} \$',
+              'Текущая цена: ${formatCryptoPrice(widget.coinDetails.priceInUSD)} \$',
               style: const TextStyle(fontSize: 18),
             ),
             const Spacer(),
@@ -390,7 +390,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
                         ? null
                         : () => Navigator.pop(context),
                     child: Text(
-                        'Cancel',
+                        'Отмена',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontSize: 18,
                             color: Theme.of(context).colorScheme.primary
@@ -417,7 +417,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
                       ),
                     )
                         : Text(
-                        widget.isBuy ? 'Buy' : 'Sell',
+                        widget.isBuy ? 'Купить' : 'Продать',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontSize: 18,
                             color: Theme.of(context).colorScheme.primary

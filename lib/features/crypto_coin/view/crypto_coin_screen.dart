@@ -139,7 +139,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
 
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please login to ${isBuy ? 'purchase' : 'sell'}')),
+        SnackBar(content: Text('Войдите для ${isBuy ? 'покупки' : 'продажи'}')),
       );
       Navigator.push(
         context,
@@ -162,7 +162,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
     if (coin != null) {
       _coinDetailsBloc.add(LoadCryptoCoinDetails(currencyCode: coin!.name));
       _chartBloc?.add(LoadCryptoChart(coin!.symbol, timeFrame: _selectedTimeFrame));
-      //context.read<CryptoChartBloc>().add(LoadCryptoChart(coin!.symbol));
     }
   }
 
@@ -178,7 +177,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             final authState = context.read<AuthBloc>().state;
             if (authState is! Authenticated) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please sign in to add favorites')),
+                const SnackBar(content: Text('Войдите чтобы добавить в избранное')),
               );
               Navigator.push(
                 context,
@@ -212,8 +211,6 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       if (_chartBloc != null)
                         BlocProvider.value(
                           value: _chartBloc!,
-                          // create: (context) => CryptoChartBloc(GetIt.I<CryptoCandleRepository>())
-                          //   ..add(LoadCryptoChart(coin!.symbol)),
                           child: _buildContent(state.coinDetails),
                         )
                     ]
@@ -309,7 +306,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       ),
                       onPressed: () => _showTradeDialog(context, coinDetails, true),
                       child: Text(
-                        'Buy',
+                        'Купить',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -326,7 +323,7 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
                       ),
                       onPressed: () => _showTradeDialog(context, coinDetails, false),
                       child: Text(
-                        'Sell',
+                        'Продать',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -343,12 +340,12 @@ class _CryptoCoinScreenState extends State<CryptoCoinScreen> {
             child: Column(
               children: [
                 CryptoDataRow(
-                  title: 'High 24 Hour',
+                  title: 'Высшая цена за 24 часа',
                   value: '${formatCryptoPrice(coinDetails.high24Hour)} \$',
                 ),
                 const SizedBox(height: 6),
                 CryptoDataRow(
-                  title: 'Low 24 Hour',
+                  title: 'Низшая цена за 24 часа',
                   value: '${formatCryptoPrice(coinDetails.low24Hour)} \$',
                 ),
                 const SizedBox(height: 6),

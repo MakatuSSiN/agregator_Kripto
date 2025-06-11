@@ -16,7 +16,7 @@ class AuthRepository {
       );
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Sign in failed');
+      throw AuthException(e.message ?? 'Войти не удалось');
     }
   }
 
@@ -35,7 +35,7 @@ class AuthRepository {
       await credential.user?.sendEmailVerification();
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Sign up failed');
+      throw AuthException(e.message ?? 'Регистрация не удалась');
     }
   }
 
@@ -50,13 +50,13 @@ class AuthRepository {
         await user.sendEmailVerification();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'too-many-requests') {
-          throw AuthException('Please wait before resending');
+          throw AuthException('Пожалуйста, подождите перед отправкой');
         } else {
-          throw AuthException(e.message ?? 'Failed to send verification email');
+          throw AuthException(e.message ?? 'Не удалось отправить письмо');
         }
       }
     } else {
-      throw AuthException('No authenticated user');
+      throw AuthException('Нет авторизованного пользователя');
     }
   }
 }

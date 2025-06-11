@@ -36,7 +36,7 @@ class PortfolioList extends StatelessWidget {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load price data: ${e.toString()}')),
+        SnackBar(content: Text('Не удалось загрузить данные о ценах: ${e.toString()}')),
       );
     }
   }
@@ -53,7 +53,7 @@ class PortfolioList extends StatelessWidget {
         }
         if (state is PortfolioLoaded) {
           if (state.portfolioItems.isEmpty) {
-            return const Center(child: Text('Your portfolio is empty'));
+            return const Center(child: Text('Ваш портфель пуст'));
           }
 
           return ListView.builder(
@@ -79,7 +79,7 @@ class PortfolioList extends StatelessWidget {
                     backgroundColor: Colors.red.shade900,
                   ),
                   onPressed: () => _showSellDialog(context, item),
-                  child: Text('Sell',
+                  child: Text('Продать',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -65,7 +65,7 @@ class CryptoCoinAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             );
           }
-          return const Text('Loading...');
+          return const Text('Загрузка...');
           },
       ),
       centerTitle: true,
