@@ -40,7 +40,7 @@ class CryptoCandleRepository {
         );
       }).toList();
     } catch (e) {
-      throw Exception('Не удалось загрузить данные: $e');
+      throw ('Не удалось загрузить данные: $e');
     }
   }
 }

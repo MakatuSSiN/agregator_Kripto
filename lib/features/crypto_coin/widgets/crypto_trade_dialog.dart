@@ -82,7 +82,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
       final usdAmount = double.tryParse(usdController.text);
 
       if (amount == null || amount <= 0 || usdAmount == null || usdAmount <= 0) {
-        throw Exception('Введите правильное количество');
+        throw ('Введите правильное количество');
       }
 
       if (widget.isBuy) {
@@ -110,7 +110,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
     // 1. Check balance
     final currentBalance = await balanceBloc.getCurrentBalance();
     if (currentBalance < usdAmount) {
-      throw Exception('Недостаточно средств на балансе');
+      throw ('Недостаточно средств на балансе');
     }
 
     // 2. Update balance
@@ -121,7 +121,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
     state is BalanceOperationSuccess || state is BalanceError);
 
     if (balanceBloc.state is BalanceError) {
-      throw Exception((balanceBloc.state as BalanceError).message);
+      throw ((balanceBloc.state as BalanceError).message);
     }
 
     // 3. Add to portfolio
@@ -177,7 +177,7 @@ class _CryptoTradeDialogState extends State<CryptoTradeDialog> {
       state is BalanceOperationSuccess || state is BalanceError);
 
       if (balanceBloc.state is BalanceError) {
-        throw Exception((balanceBloc.state as BalanceError).message);
+        throw ((balanceBloc.state as BalanceError).message);
       }
 
       // Update UI

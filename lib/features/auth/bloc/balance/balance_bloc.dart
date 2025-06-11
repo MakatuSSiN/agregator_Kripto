@@ -32,7 +32,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
       ) async {
     try {
       final user = firebaseAuth.currentUser;
-      if (user == null) throw Exception('Пользователь не авторизован');
+      if (user == null) throw ('Пользователь не авторизован');
 
       final balanceRef = firestore
           .collection('users')
@@ -91,7 +91,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
     emit(BalanceLoading());
     try {
       final user = firebaseAuth.currentUser;
-      if (user == null) throw Exception('Пользователь не авторизован');
+      if (user == null) throw ('Пользователь не авторизован');
 
       final doc = await firestore
           .collection('users')
@@ -100,7 +100,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
           .doc('USD')
           .get();
 
-      if (!doc.exists) throw Exception('Баланс не найден');
+      if (!doc.exists) throw ('Баланс не найден');
 
       emit(BalanceLoaded(doc.data()!['amount']));
     } catch (e) {
@@ -115,7 +115,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
       ) async {
     try {
       final user = firebaseAuth.currentUser;
-      if (user == null) throw Exception('Пользователь не авторизован');
+      if (user == null) throw ('Пользователь не авторизован');
 
       final balanceRef = firestore
           .collection('users')
@@ -133,7 +133,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
             : currentBalance + event.amount;
 
         if (event.isSpending && newBalance < 0) {
-          throw Exception('Недостаточно средств');
+          throw ('Недостаточно средств');
         }
 
         transaction.update(balanceRef, {'amount': newBalance});
@@ -151,7 +151,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
   /// Получение текущего баланса
   Future<double> getCurrentBalance() async {
     final user = firebaseAuth.currentUser;
-    if (user == null) throw Exception('Пользователь не авторизован');
+    if (user == null) throw ('Пользователь не авторизован');
 
     final doc = await firestore
         .collection('users')
@@ -160,7 +160,7 @@ class BalanceBloc extends Bloc<BalanceEvent, BalanceState> {
         .doc('USD')
         .get();
 
-    if (!doc.exists) throw Exception('Баланс не найден');
+    if (!doc.exists) throw ('Баланс не найден');
     return (doc.data()?['amount'] ?? 0).toDouble();
   }
 }

@@ -81,10 +81,10 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
 
       // Получаем текущее количество монет
       final doc = await transaction.get(portfolioRef);
-      if (!doc.exists) throw Exception('Монета не найдена в портфеле');
+      if (!doc.exists) throw ('Монета не найдена в портфеле');
 
       final currentAmount = (doc.data()?['amount'] ?? 0).toDouble();
-      if (currentAmount < amount) throw Exception('Недостаточно монет для продажи');
+      if (currentAmount < amount) throw ('Недостаточно монет для продажи');
 
       final newAmount = currentAmount - amount;
 

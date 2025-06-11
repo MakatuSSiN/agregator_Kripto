@@ -36,6 +36,7 @@ class VerificationSentWidget extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Письмо с подтверждением отправлено',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.secondary,
               ),

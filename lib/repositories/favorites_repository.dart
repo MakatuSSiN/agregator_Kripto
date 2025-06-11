@@ -14,7 +14,7 @@ class FavoritesRepository {
 
   Future<List<CryptoCoin>> getFavorites() async {
     final user = firebaseAuth.currentUser;
-    if (user == null) throw Exception('Пользователь не авторизован');
+    if (user == null) throw ('Пользователь не авторизован');
 
     final snapshot = await firestore
         .collection('users')
@@ -27,7 +27,7 @@ class FavoritesRepository {
 
   Future<void> addFavorite(CryptoCoin coin) async {
     final user = firebaseAuth.currentUser;
-    if (user == null) throw Exception('Пользователь не авторизован');
+    if (user == null) throw ('Пользователь не авторизован');
 
     await firestore
         .collection('users')
@@ -39,7 +39,7 @@ class FavoritesRepository {
 
   Future<void> removeFavorite(CryptoCoin coin) async {
     final user = firebaseAuth.currentUser;
-    if (user == null) throw Exception('Пользователь не авторизован');
+    if (user == null) throw ('Пользователь не авторизован');
 
     await firestore
         .collection('users')
