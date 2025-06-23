@@ -59,10 +59,3 @@ void _setupDependencies() {
     )..add(LoadFavorites()),
   );
 }
-
-
-
-
-
-
-

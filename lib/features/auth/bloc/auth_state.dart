@@ -40,3 +40,10 @@ class EmailNotVerified extends AuthState {
   @override
   List<Object> get props => [email];
 }
+class PasswordResetSent extends AuthState {
+  final String email;
+  const PasswordResetSent(this.email);
+
+  @override
+  List<Object> get props => [email];
+}

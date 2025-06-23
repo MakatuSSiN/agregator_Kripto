@@ -24,8 +24,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignOutRequested>(_signOut);
     on<ResendVerificationRequested>(_resendVerification);
     on<LoadFavoritesRequested>(_loadFavorites);
+    on<PasswordResetRequested>(_passwordReset);
   }
-
+  Future<void> _passwordReset(
+      PasswordResetRequested event,
+      Emitter<AuthState> emit
+      ) async {
+    emit(AuthLoading());
+    try {
+      await authRepository.sendPasswordResetEmail(event.email);
+      emit(PasswordResetSent(event.email));
+    } catch (e) {
+      emit(AuthError(e is AuthException ? e.message : e.toString()));
+    }
+  }
   /// Проверка текущего состояния аутентификации
   Future<void> _authCheck(AuthCheckRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
@@ -77,13 +89,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.signIn(event.email, event.password);
       if (user != null) {
+        await user.reload();
         if (user.emailVerified) {
           emit(Authenticated(user));
           // Пересоздаем FavoritesBloc для активации подписки
           getIt.resetLazySingleton<FavoritesBloc>();
           getIt<FavoritesBloc>().add(LoadFavorites());
         } else {
-          await authRepository.resendVerificationEmail();
           emit(EmailNotVerified(user.email ?? event.email));
         }
       }

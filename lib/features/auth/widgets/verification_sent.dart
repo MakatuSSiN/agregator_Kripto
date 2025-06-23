@@ -21,7 +21,18 @@ class VerificationSentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+        context.read<AuthBloc>().add(SignOutRequested());
+    },
+    ),
+    ),
+    body: Center(
         child: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -49,7 +60,7 @@ class VerificationSentWidget extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             BlocListener<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is AuthError) {
@@ -93,6 +104,8 @@ class VerificationSentWidget extends StatelessWidget {
           ],
         ),
       ),
-    ));
+    )
+    )
+    );
   }
 }

@@ -86,6 +86,15 @@ class _AuthFormState extends State<AuthForm> {
         if (state is EmailVerificationSent) {
           _startResendTimer();
         }
+        if (state is PasswordResetSent) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Письмо для сброса пароля отправлено на ${state.email}'),
+              ),
+            );
+          });
+        }
       },
       builder: (context, state) {
         if (state is EmailVerificationSent) {
@@ -230,13 +239,107 @@ class _AuthFormState extends State<AuthForm> {
                   ? 'Создать аккаунт'
                   : 'У меня есть аккаунт'),
             ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.secondary,
+              ),
+              onPressed: () {
+                _showPasswordResetDialog(context);
+              },
+              child: const Text('Забыли пароль?'),
+            ),
           ],
         ),
       ),
     )
     );
   }
+  void _showPasswordResetDialog(BuildContext context) {
+    final emailController = TextEditingController();
 
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text(
+            'Сброс пароля',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+          content: TextField(
+            controller: emailController,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            decoration: InputDecoration(
+              labelText: 'Введите ваш email',
+              labelStyle: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Отмена',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).colorScheme.onSecondary,
+              ),
+              onPressed: () {
+                if (emailController.text.isNotEmpty &&
+                    emailController.text.contains('@')) {
+                  context.read<AuthBloc>().add(
+                      PasswordResetRequested(emailController.text)
+                  );
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Письмо для сброса пароля отправлено на почту',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary
+                        ),
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                  );
+                }
+              },
+              child: Text(
+                'Отправить',
+                style: TextStyle(
+                  // Явно задаем противоположный цвет для текста
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black // Для темной темы - черный текст
+                      : Colors.white, // Для светлой темы - белый текст
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text;

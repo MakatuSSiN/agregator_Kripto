@@ -19,7 +19,13 @@ class AuthRepository {
       throw AuthException(e.message ?? 'Войти не удалось');
     }
   }
-
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.message ?? 'Не удалось отправить письмо для сброса пароля');
+    }
+  }
   Future<User?> signUp(String email, String password) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(

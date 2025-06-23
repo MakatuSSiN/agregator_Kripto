@@ -41,6 +41,11 @@ final darkTheme = ThemeData(
       borderRadius: BorderRadius.circular(8),
     ),
   ),
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: Colors.white, // Белый курсор в темной теме
+    selectionColor: Colors.yellow.withValues(alpha: 0.4), // Цвет выделения
+    selectionHandleColor: Colors.yellow, // Цвет "ручек" выделения
+  ),
 
 );
 
@@ -85,7 +90,11 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.circular(8),
     ),
   ),
-
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: Colors.black, // Черный курсор в светлой теме
+    selectionColor: Colors.black.withValues(alpha: 0.4), // Цвет выделения
+    selectionHandleColor: Colors.black, // Цвет "ручек" выделения
+  ),
 );
 
 

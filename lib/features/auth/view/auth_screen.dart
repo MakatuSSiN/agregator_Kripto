@@ -39,6 +39,32 @@ class AuthScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is Authenticated) {
                 return _UserProfile(user: state.user);
+              } else if (state is EmailNotVerified) {
+                return VerificationSentWidget(
+                  email: state.email,
+                  canResend: true, // или ваша логика для canResend
+                  resendCooldown: 0, // или ваше значение
+                  onResendPressed: () {
+                    context.read<AuthBloc>().add(ResendVerificationRequested(state.email));
+                  },
+                  onVerifiedPressed: () async {
+                    try {
+                      await FirebaseAuth.instance.currentUser?.reload();
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user?.emailVerified ?? false) {
+                        context.read<AuthBloc>().add(AuthCheckRequested());
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Пожалуйста, подтвердите почту')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ошибка: ${e.toString()}')),
+                      );
+                    }
+                  },
+                );
               } else {
                 return const AuthForm();
               }
