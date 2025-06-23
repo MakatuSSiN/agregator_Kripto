@@ -32,16 +32,8 @@ class CustomNavigationBar extends StatelessWidget {
                     content: const Text('Войдите, чтобы посмотреть избранное'),
                     duration: const Duration(seconds: 3),
                     behavior: SnackBarBehavior.floating,
-                    // action: SnackBarAction(
-                    //   label: 'OK',
-                    //   onPressed: () {
-                    //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    //   },
-                    // ),
                   ),
                 );
-                //..removeCurrentSnackBar(); // Удаляем после скрытия
-
               // Сбрасываем флаг после скрытия снекбара
               Future.delayed(const Duration(seconds: 3), () {
                 _isSnackBarVisible = false;
