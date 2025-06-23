@@ -6,8 +6,9 @@ import '../../auth/bloc/auth_bloc.dart';
 class CustomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onIndexChanged;
+  bool _isSnackBarVisible = false;
 
-  const CustomNavigationBar({
+  CustomNavigationBar({
     super.key,
     required this.currentIndex,
     required this.onIndexChanged,
@@ -22,9 +23,29 @@ class CustomNavigationBar extends StatelessWidget {
           selectedIndex: currentIndex,
           onDestinationSelected: (index) {
             if (index == 1 && authState is! Authenticated) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Войдите, чтобы посмотреть избранное')),
-              );
+              if (_isSnackBarVisible) {return;}
+              _isSnackBarVisible = true;
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar() // Скрываем предыдущий (если есть)
+                ..showSnackBar(
+                  SnackBar(
+                    content: const Text('Войдите, чтобы посмотреть избранное'),
+                    duration: const Duration(seconds: 3),
+                    behavior: SnackBarBehavior.floating,
+                    // action: SnackBarAction(
+                    //   label: 'OK',
+                    //   onPressed: () {
+                    //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    //   },
+                    // ),
+                  ),
+                );
+                //..removeCurrentSnackBar(); // Удаляем после скрытия
+
+              // Сбрасываем флаг после скрытия снекбара
+              Future.delayed(const Duration(seconds: 3), () {
+                _isSnackBarVisible = false;
+              });
               return;
             }
             onIndexChanged(index);
