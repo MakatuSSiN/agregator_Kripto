@@ -16,7 +16,17 @@ class AuthRepository {
       );
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Войти не удалось');
+      if (e.code == 'user-not-found') {
+        throw AuthException('Пользователь с такой почтой не найден');
+      } else if (e.code == 'wrong-password') {
+        throw AuthException('Неверный пароль');
+      } else if (e.code == 'invalid-email') {
+        throw AuthException('Некорректный формат почты');
+      } else if (e.code == 'user-disabled') {
+        throw AuthException('Аккаунт заблокирован');
+      } else {
+        throw AuthException('Ошибка входа. Проверьте введенные данные');
+      }
     }
   }
   Future<void> sendPasswordResetEmail(String email) async {
@@ -41,7 +51,15 @@ class AuthRepository {
       await credential.user?.sendEmailVerification();
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      throw AuthException(e.message ?? 'Регистрация не удалась');
+      if (e.code == 'email-already-in-use') {
+        throw AuthException('На эту почту уже зарегистрирован аккаунт');
+      } else if (e.code == 'weak-password') {
+        throw AuthException('Пароль слишком слабый (минимум 6 символов)');
+      } else if (e.code == 'invalid-email') {
+        throw AuthException('Некорректный формат почты');
+      } else {
+        throw AuthException('Ошибка регистрации: ${e.message}');
+      }
     }
   }
 
@@ -70,4 +88,6 @@ class AuthRepository {
 class AuthException implements Exception {
   final String message;
   AuthException(this.message);
+  @override
+  String toString() => message;
 }

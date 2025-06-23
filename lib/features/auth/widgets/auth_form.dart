@@ -78,23 +78,27 @@ class _AuthFormState extends State<AuthForm> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthError) {
+      if (state is AuthError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.message),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      if (state is EmailVerificationSent) {
+        _startResendTimer();
+      }
+      if (state is PasswordResetSent) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(
+              content: Text('Письмо для сброса пароля отправлено на ${state.email}'),
+            ),
           );
-        }
-        if (state is EmailVerificationSent) {
-          _startResendTimer();
-        }
-        if (state is PasswordResetSent) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Письмо для сброса пароля отправлено на ${state.email}'),
-              ),
-            );
-          });
-        }
+        });
+      }
       },
       builder: (context, state) {
         if (state is EmailVerificationSent) {

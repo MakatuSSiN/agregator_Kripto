@@ -92,15 +92,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await user.reload();
         if (user.emailVerified) {
           emit(Authenticated(user));
-          // Пересоздаем FavoritesBloc для активации подписки
           getIt.resetLazySingleton<FavoritesBloc>();
           getIt<FavoritesBloc>().add(LoadFavorites());
         } else {
           emit(EmailNotVerified(user.email ?? event.email));
         }
       }
+    } on AuthException catch (e) {
+      emit(AuthError(e.message)); // Используем message напрямую
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('Произошла неизвестная ошибка'));
     }
   }
 
@@ -112,8 +113,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(EmailVerificationSent(event.email));
       }
+    } on AuthException catch (e) {
+      emit(AuthError(e.message)); // Используем message напрямую
     } catch (e) {
-      emit(AuthError(e is AuthException ? e.message : e.toString()));
+      emit(AuthError('Произошла неизвестная ошибка'));
     }
   }
 
