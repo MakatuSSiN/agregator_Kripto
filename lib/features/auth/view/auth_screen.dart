@@ -98,6 +98,7 @@ class _UserProfile extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primary,
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
+            automaticallyImplyLeading: false,
             title: Text(
               user.email ?? 'Профиль',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 22),
